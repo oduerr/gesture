@@ -1,4 +1,7 @@
 This project uses markdown see https://quarto.org/ for more info. 
+This side created as a docs folder see  https://quarto.org/docs/publishing/github-pages.html#render-to-docs
+for a description.
+
 
 # How to create webpages from R (qmd)
 

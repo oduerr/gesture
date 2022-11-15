@@ -1,0 +1,9 @@
+project:
+  output-dir: ../../docs/
+
+toc: true
+number-sections: true
+bibliography: references.bib  
+  
+
+

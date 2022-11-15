@@ -1,6 +1,6 @@
 This project uses markdown see https://quarto.org/ for more info. 
-This side created as a docs folder see  https://quarto.org/docs/publishing/github-pages.html#render-to-docs
-for a description.
+The side is created as a docs folder see  https://quarto.org/docs/publishing/github-pages.html#render-to-docs
+for a description of that approach. 
 
 
 # How to create webpages from R (qmd)
@@ -15,7 +15,8 @@ This means that calling  in Terminal
 ```
   quarto render 
 ```
-within this directory `R/to_docs` will render all `*.qmd` files into `../../docs/` as html. In github the github_page directory is set to `docs/`. Included is also an empty file `.nojekyll` which allows to serve the "raw"html files.
+within this directory (`R/to_docs`) will render all `*.qmd` files into `../../docs/` as html pages. 
+In github the github_page directory is set to `docs/`. Included is also an empty file `.nojekyll` which allows to serve the "raw"html files.
 
 # How top render into pdf (and other format)
 Just call in the Terminal

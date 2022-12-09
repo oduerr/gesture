@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Oliver Dürr">
 
-<title>index</title>
+<title>YawPitchRollCalculation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -18,16 +19,16 @@ ul.task-list{list-style: none;}
 </style>
 
 
-<script src="index_files/libs/clipboard/clipboard.min.js"></script>
-<script src="index_files/libs/quarto-html/quarto.js"></script>
-<script src="index_files/libs/quarto-html/popper.min.js"></script>
-<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="index_files/libs/quarto-html/anchor.min.js"></script>
-<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="rpr_calculations_files/libs/clipboard/clipboard.min.js"></script>
+<script src="rpr_calculations_files/libs/quarto-html/quarto.js"></script>
+<script src="rpr_calculations_files/libs/quarto-html/popper.min.js"></script>
+<script src="rpr_calculations_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="rpr_calculations_files/libs/quarto-html/anchor.min.js"></script>
+<link href="rpr_calculations_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="rpr_calculations_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="rpr_calculations_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="rpr_calculations_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="rpr_calculations_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -40,36 +41,37 @@ ul.task-list{list-style: none;}
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#how-the-website-is-created" id="toc-how-the-website-is-created" class="nav-link active" data-scroll-target="#how-the-website-is-created"> <span class="header-section-number">1</span> How the website is created</a>
-  <ul class="collapse">
-  <li><a href="#how-to-create-webpages-from-r-qmd" id="toc-how-to-create-webpages-from-r-qmd" class="nav-link" data-scroll-target="#how-to-create-webpages-from-r-qmd"> <span class="header-section-number">1.1</span> How to create webpages from R (qmd)</a></li>
-  <li><a href="#how-to-render-into-pdf-and-other-format" id="toc-how-to-render-into-pdf-and-other-format" class="nav-link" data-scroll-target="#how-to-render-into-pdf-and-other-format"> <span class="header-section-number">1.2</span> How to render into pdf (and other format)</a></li>
-  </ul></li>
+  <li><a href="#calculations-done-on-arduino" id="toc-calculations-done-on-arduino" class="nav-link active" data-scroll-target="#calculations-done-on-arduino"> <span class="header-section-number">1</span> Calculations done on Arduino</a></li>
   </ul>
 </nav>
 </div>
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">YawPitchRollCalculation</h1>
+</div>
 
 
-<section id="how-the-website-is-created" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> How the website is created</h1>
-<p>This project uses markdown see <a href="https://quarto.org/" class="uri">https://quarto.org/</a> for more info. The side is created as a docs folder see <a href="https://quarto.org/docs/publishing/github-pages.html#render-to-docsttps://quarto.org/docs/publishing/github-pages.html#render-to-docs">https://quarto.org/docs/publishing/github-pages.html#render-to-docs</a> for a description of that approach.</p>
-<section id="how-to-create-webpages-from-r-qmd" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="how-to-create-webpages-from-r-qmd"><span class="header-section-number">1.1</span> How to create webpages from R (qmd)</h2>
-<p>In this directory is a file called <code>_quarto.yml</code> with the content:</p>
-<pre><code>output-dir: ../../docs/</code></pre>
-<p>This means that calling in Terminal (not in the console)</p>
-<pre><code>  quarto render </code></pre>
-<p>within this directory (<code>R/to_docs</code>) will render all <code>*.qmd</code> files into <code>../../docs/</code> as html pages. In github the github_page directory is set to <code>docs/</code>. Included is also an empty file <code>.nojekyll</code> which allows to serve the “raw” html files.</p>
-</section>
-<section id="how-to-render-into-pdf-and-other-format" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="how-to-render-into-pdf-and-other-format"><span class="header-section-number">1.2</span> How to render into pdf (and other format)</h2>
-<p>Just call in the Terminal</p>
-<pre><code>  quarto render --to pdf # Renders all files
-  quarto render Note_on_Quaternion.qmd --to pdf  #Renders the single file 
-  quarto render Note_on_Quaternion.qmd --to docx #Renders the single file --&gt; word</code></pre>
-</section>
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Oliver Dürr </p>
+          </div>
+  </div>
+    
+    
+  </div>
+  
+
+</header>
+
+<section id="calculations-done-on-arduino" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="calculations-done-on-arduino"><span class="header-section-number">1</span> Calculations done on Arduino</h2>
+<p>The DSP calculates the quaternions, they are send to the Arduino, which used the following code.</p>
 </section>
 
 </main>

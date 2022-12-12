@@ -40,11 +40,7 @@ ul.task-list{list-style: none;}
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#how-the-website-is-created" id="toc-how-the-website-is-created" class="nav-link active" data-scroll-target="#how-the-website-is-created"> <span class="header-section-number">1</span> How the website is created</a>
-  <ul class="collapse">
-  <li><a href="#how-to-create-webpages-from-r-qmd" id="toc-how-to-create-webpages-from-r-qmd" class="nav-link" data-scroll-target="#how-to-create-webpages-from-r-qmd"> <span class="header-section-number">1.1</span> How to create webpages from R (qmd)</a></li>
-  <li><a href="#how-to-render-into-pdf-and-other-format" id="toc-how-to-render-into-pdf-and-other-format" class="nav-link" data-scroll-target="#how-to-render-into-pdf-and-other-format"> <span class="header-section-number">1.2</span> How to render into pdf (and other format)</a></li>
-  </ul></li>
+  <li><a href="#imu" id="toc-imu" class="nav-link active" data-scroll-target="#imu"> <span class="header-section-number">1</span> imu</a></li>
   </ul>
 </nav>
 </div>
@@ -52,24 +48,14 @@ ul.task-list{list-style: none;}
 
 
 
-<section id="how-the-website-is-created" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> How the website is created</h1>
-<p>This project uses markdown see <a href="https://quarto.org/" class="uri">https://quarto.org/</a> for more info. The side is created as a docs folder see <a href="https://quarto.org/docs/publishing/github-pages.html#render-to-docsttps://quarto.org/docs/publishing/github-pages.html#render-to-docs">https://quarto.org/docs/publishing/github-pages.html#render-to-docs</a> for a description of that approach.</p>
-<section id="how-to-create-webpages-from-r-qmd" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="how-to-create-webpages-from-r-qmd"><span class="header-section-number">1.1</span> How to create webpages from R (qmd)</h2>
-<p>In this directory is a file called <code>_quarto.yml</code> with the content:</p>
-<pre><code>output-dir: ../../docs/</code></pre>
-<p>This means that calling in Terminal (not in the console)</p>
-<pre><code>  quarto render </code></pre>
-<p>within this directory (<code>R/to_docs</code>) will render all <code>*.qmd</code> files into <code>../../docs/</code> as html pages. In github the github_page directory is set to <code>docs/</code>. Included is also an empty file <code>.nojekyll</code> which allows to serve the “raw” html files.</p>
-</section>
-<section id="how-to-render-into-pdf-and-other-format" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="how-to-render-into-pdf-and-other-format"><span class="header-section-number">1.2</span> How to render into pdf (and other format)</h2>
-<p>Just call in the Terminal</p>
-<pre><code>  quarto render --to pdf # Renders all files
-  quarto render Note_on_Quaternion.qmd --to pdf  #Renders the single file 
-  quarto render Note_on_Quaternion.qmd --to docx #Renders the single file --&gt; word</code></pre>
-</section>
+<section id="imu" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> imu</h1>
+<p>Collection of notes / code for IMU.</p>
+<ul>
+<li><p>Note on calculating the Raw Pitch Roll https://oduerr.github.io/gesture/rpr_calculations.html</p></li>
+<li><p>Note on rotations and quaterions https://oduerr.github.io/gesture/Note_on_Quaternion.html</p></li>
+<li><p>Technical details how the website is rendered https://oduerr.github.io/gesture/website_creation.html</p></li>
+</ul>
 </section>
 
 </main>

@@ -118,7 +118,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   </ul></li>
   <li><a href="#comparison-with-other-methods" id="toc-comparison-with-other-methods" class="nav-link" data-scroll-target="#comparison-with-other-methods"> <span class="header-section-number">2</span> Comparison with other methods</a></li>
-  <li><a href="#comparison" id="toc-comparison" class="nav-link" data-scroll-target="#comparison"> <span class="header-section-number">3</span> Comparison</a></li>
+  <li><a href="#comparison-with-arduino-for-many-values" id="toc-comparison-with-arduino-for-many-values" class="nav-link" data-scroll-target="#comparison-with-arduino-for-many-values"> <span class="header-section-number">3</span> Comparison with Arduino for many values</a></li>
   </ul>
 </nav>
 </div>
@@ -241,14 +241,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <section id="what-the-code-does" class="level3" data-number="1.2.1">
 <h3 data-number="1.2.1" class="anchored" data-anchor-id="what-the-code-does"><span class="header-section-number">1.2.1</span> What the code does</h3>
-<p>What is happening in the code? We are asking “How does the gravity” looks like on the IMU <span class="math inline">\(g_{\tt{IMU}}\)</span>? The gravity in the laboratory frame is given by $g_{\tt{lab}}=(0,0,1)$. Note that, we could also define a different lab frame in which the gravity is e.q. given by <span class="math inline">\((0,1,0)\)</span>. From the Quaternion Algebra (see e.g.&nbsp;<a href="https://oduerr.github.io/gesture/Note_on_Quaternion.html">Note_on_Quaternion</a>), we know that:</p>
+<p>What is happening in the code? First, we note that quaternion <span class="math inline">\(q\)</span>, given back from the IMU transforms from the IMU coordinate system into the lab system. To make this clear, we write <span class="math inline">\(g = g_{L \leftarrow I}\)</span> in the following. We are asking “How does the gravity” looks like on the IMU <span class="math inline">\(g_{I}\)</span>? The gravity in the laboratory frame is given by <span class="math inline">\(g_{L}=(0,0,1)\)</span>. Note that, we could also define a different lab frame in which the gravity is e.q. given by <span class="math inline">\((0,1,0)\)</span>. From the Quaternion Algebra (see e.g.&nbsp;<a href="https://oduerr.github.io/gesture/Note_on_Quaternion.html">Note_on_Quaternion</a>), we know that (L = Lab, I = IMU):</p>
 <p><span class="math display">\[
-q_{\tt{lab}} = q \; q_{\tt{IMU}} \; q^{-1}
+q_{L} = q_{L \leftarrow I} \; q_{I} \; q_{L \leftarrow I}^{-1}
 \]</span></p>
-<p>Where <span class="math inline">\(q_{\tt{lab}}=(0,0,0,1)\)</span> and <span class="math inline">\(q_{\tt{IMU}}=(0,g_x, g_y, g_z)\)</span> are pure quaternions, i.e.&nbsp;they take the vectors and set the real part <span class="math inline">\(w\)</span> to 0. To solve for <span class="math inline">\(q_{IMU}\)</span>, we multiply with <span class="math inline">\(q^{-1}\)</span> and <span class="math inline">\(q\)</span> from left and right. Getting:</p>
+<p>Where <span class="math inline">\(q_{\tt{L}}=(0,0,0,1)\)</span> and <span class="math inline">\(q_{I}=(0,g_x, g_y, g_z)\)</span> are pure quaternions, i.e.&nbsp;they take the vectors and set the real part <span class="math inline">\(w\)</span> to 0. To solve for <span class="math inline">\(q_{IMU}\)</span>, we multiply with <span class="math inline">\(q^{-1}\)</span> and <span class="math inline">\(q\)</span> from left and right. Getting:</p>
 <p><span class="math display">\[
-  q_{\tt{IMU}}  = q^{-1} \; q_{\tt{lab}} \; q
-\]</span> We can verify this with the R-Code:</p>
+  q_{I}  = q_{L \leftarrow I}^{-1} \; q_{L} \; q_{L \leftarrow I}
+  = q_{I \leftarrow L} \; q_{L} \; q_{I \leftarrow L}^{-1}
+\]</span></p>
+<p>We can verify this with the R-Code:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -304,10 +306,10 @@ k   6.514515e-01</code></pre>
 </div>
 <p>In math:</p>
 <p>$$ <span class="math display">\[\begin{align}
-  yaw &amp;= {\tt atan2} (2 q_x q_y - 2 q_w q_z, 2 q_w^2 + 2 q_x^2 -1) \\
+  {\tt yaw} &amp;= {\tt atan2} (2 q_x q_y - 2 q_w q_z, 2 q_w^2 + 2 q_x^2 -1) \\
   
-  pitch &amp;= {\tt atan} (\frac{g_x}{\sqrt{g_y^2 + g_z ^2}}) \\
-  roll &amp;= {\tt atan} (\frac{g_y}{\sqrt{g_x^2 + g_z ^2}} )
+  {\tt pitch} &amp;= {\tt atan} (\frac{g_x}{\sqrt{g_y^2 + g_z ^2}}) \\
+  {\tt roll} &amp;= {\tt atan} (\frac{g_y}{\sqrt{g_x^2 + g_z ^2}} )
 \end{align}\]</span> $$</p>
 <p>This translate to the following R-Code.</p>
 <div class="cell">
@@ -330,27 +332,30 @@ k   6.514515e-01</code></pre>
 <pre><code>[1]  2.28 -0.77 -0.31</code></pre>
 </div>
 </div>
-<p>The result from the Arduino is: (2.28, -0.77, -0.31). We can reproduce the results from the Arduino (see Comparison).</p>
+<p>The result from the Arduino is: (2.28, -0.77, -0.31). We can reproduce the results from the Arduino (see Comparison for more examples).</p>
 <section id="what-the-code-does-1" class="level3" data-number="1.3.1">
 <h3 data-number="1.3.1" class="anchored" data-anchor-id="what-the-code-does-1"><span class="header-section-number">1.3.1</span> What the code does</h3>
-<p>For yaw it extracts the angle using quaternions. For pitch it uses the before calculated gravity (in the IMU space). Let’s start with the pitch and roll. From https://ahrs.readthedocs.io/en/latest/filters/tilt.html we find (with <span class="math inline">\(a\)</span> being the normalized gravity vector in the IMU space).</p>
+<p>For yaw it extracts the angle using quaternions. For pitch it uses the gravity calculated before (in the IMU space). Let’s start with the pitch and roll. From (https://ahrs.readthedocs.io/en/latest/filters/tilt.html we find (with <span class="math inline">\(a\)</span> being the normalized gravity vector in the IMU space).</p>
 <p><span class="math display">\[
-  {\tt pitch} = \arctan2(-a_x, \sqrt{a_y^2 + a_z^2}) \\
-  {\tt roll} = \arctan2(a_y, a_z)
-\]</span> Pitch:</p>
+\begin{align}
+  {\tt pitch} &amp;= \arctan2(-a_x, \sqrt{a_y^2 + a_z^2}) \\
+  {\tt roll} &amp;= \arctan2(a_y, a_z)
+\end{align}
+\]</span></p>
+<p>Pitch:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Pitch</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">atan</span>(gravity[<span class="dv">1</span>] <span class="sc">/</span> <span class="fu">sqrt</span>(gravity[<span class="dv">2</span>]<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> gravity[<span class="dv">3</span>]<span class="sc">^</span><span class="dv">2</span>)) <span class="co">#As done in Aduino</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Pitch as As done on Aduino</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">atan</span>(gravity[<span class="dv">1</span>] <span class="sc">/</span> <span class="fu">sqrt</span>(gravity[<span class="dv">2</span>]<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> gravity[<span class="dv">3</span>]<span class="sc">^</span><span class="dv">2</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -0.7702244</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">=</span> gravity<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fu">sum</span>(gravity<span class="sc">^</span><span class="dv">2</span>)) <span class="co">#We are normalized</span></span>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Pitch from </span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">=</span> gravity<span class="sc">/</span><span class="fu">sqrt</span>(<span class="fu">sum</span>(gravity<span class="sc">^</span><span class="dv">2</span>)) <span class="co">#Normalizing (we are almost normalized)</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">atan2</span>(<span class="sc">-</span>a[<span class="dv">1</span>], <span class="fu">sqrt</span>(a[<span class="dv">2</span>]<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> a[<span class="dv">3</span>]<span class="sc">^</span><span class="dv">2</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
@@ -376,13 +381,13 @@ k   6.514515e-01</code></pre>
 <pre><code>[1] -0.4332065</code></pre>
 </div>
 </div>
-<p>For the roll, we get a different value compared to the Arduino.</p>
+<p><strong>For the roll, we get a different value compared to the Arduino.</strong></p>
 </section>
 </section>
 </section>
 <section id="comparison-with-other-methods" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Comparison with other methods</h1>
-<p>Usually the YPR is calculated differently.</p>
+<p>Usually the YPR is calculated differently not via the gravity first. In the following we compare different solutions.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -450,71 +455,58 @@ k   6.514515e-01</code></pre>
 <pre><code>[1] -2.5986827  0.7692547 -0.4326218</code></pre>
 </div>
 </div>
-<p>Testing the routines, for different values. See https://matthew-brett.github.io/transforms3d/reference/transforms3d.euler.html</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">quaternion</span>(<span class="at">Re =</span> <span class="fl">0.99810947</span>, <span class="at">i=</span><span class="fl">0.06146124</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quart_to_ypr_value9250</span>(<span class="fu">as.numeric</span>(q))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.000 0.000 0.123</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quart_to_ypr_chatgpt</span>(<span class="fu">as.numeric</span>(q))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.000 0.000 0.123</code></pre>
-</div>
-</div>
 </section>
-<section id="comparison" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Comparison</h1>
-<p>This code shows that, we can reproduce the calculation done on the Adunio.</p>
-<div class="cell" data-show="false">
+<section id="comparison-with-arduino-for-many-values" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Comparison with Arduino for many values</h1>
+<p>This code shows that, we can reproduce the calculation done on the Ardunio for more examples.</p>
+<div class="cell" data-show="false" name="loading">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../../data/value06.csv"</span>,<span class="at">header=</span><span class="cn">TRUE</span>)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">=</span> <span class="fu">rename</span>(training, <span class="at">IMU=</span>X)</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>IMU <span class="ot">=</span> <span class="fu">as.factor</span>(training<span class="sc">$</span>IMU)</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>(training)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Loading</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../../data/value06.csv"</span>,<span class="at">header=</span><span class="cn">TRUE</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">=</span> <span class="fu">rename</span>(training, <span class="at">IMU=</span>X)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>IMU <span class="ot">=</span> <span class="fu">as.factor</span>(training<span class="sc">$</span>IMU)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#nrow(training)</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>t<span class="ot">=</span><span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">nrow</span>(training)<span class="sc">/</span><span class="dv">6</span>), <span class="at">each=</span><span class="dv">6</span>)[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(training)]</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">=</span> training <span class="sc">%&gt;%</span> <span class="fu">filter</span>(IMU <span class="sc">!=</span> <span class="st">"0"</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  dat_q <span class="ot">=</span> dat <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">'q'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 125</code></pre>
+</div>
+<div class="cell" data-show="false" name="ypr-calculation">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#YPR Calculation </span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a> ypr_calc <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">ncol=</span><span class="dv">3</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(dat_q))</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dat_q)){</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    gr <span class="ot">=</span> <span class="fu">dmpGetGravity</span>(<span class="fu">t</span>(dat_q[i,]))</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    ypr_calc[i,] <span class="ot">=</span> <span class="fu">dmpGetYawPitchRoll</span>(<span class="fu">t</span>(dat_q[i,]), gr)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  r2d <span class="ot">=</span> <span class="dv">360</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>pi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-show="false" name="plots">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">1</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>yaw, <span class="at">main=</span><span class="st">'Calculated YAW (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="768"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>t<span class="ot">=</span><span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">nrow</span>(training)<span class="sc">/</span><span class="dv">6</span>), <span class="at">each=</span><span class="dv">6</span>)[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(training)]</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">=</span> training <span class="sc">%&gt;%</span> <span class="fu">filter</span>(IMU <span class="sc">!=</span> <span class="st">"0"</span>)</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  dat_q <span class="ot">=</span> dat <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">'q'</span>))</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  ypr_calc <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">ncol=</span><span class="dv">3</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(dat_q))</span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dat_q)){</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    gr <span class="ot">=</span> <span class="fu">dmpGetGravity</span>(<span class="fu">t</span>(dat_q[i,]))</span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    ypr_calc[i,] <span class="ot">=</span> <span class="fu">dmpGetYawPitchRoll</span>(<span class="fu">t</span>(dat_q[i,]), gr)</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  r2d <span class="ot">=</span> <span class="dv">360</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>pi)</span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">1</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>yaw, <span class="at">main=</span><span class="st">'Calculated YAW (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">2</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>pitch, <span class="at">main=</span><span class="st">'Calculated Pitch (R vs Aduino) in degress'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="768"></p>
+<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-26-2.png" class="img-fluid" width="768"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">2</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>pitch, <span class="at">main=</span><span class="st">'Calculated Pitch (R vs Aduino) in degress'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">3</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>roll, <span class="at">main=</span><span class="st">'Calculated Roll (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-24-2.png" class="img-fluid" width="768"></p>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">3</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>roll, <span class="at">main=</span><span class="st">'Calculated Roll (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-24-3.png" class="img-fluid" width="768"></p>
+<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-26-3.png" class="img-fluid" width="768"></p>
 </div>
 </div>
 <p>These plots show that, we can reproduce the Aduino values in R.</p>

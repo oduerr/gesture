@@ -106,17 +106,20 @@ dmpGetGravity(q.vec)
 
 ### What the code does
 
-What is happening in the code? We are asking "How does the gravity" looks like on the IMU $g_{\tt{IMU}}$? The gravity in the laboratory frame is given by \$g\_{\\tt{lab}}=(0,0,1)\$. Note that, we could also define a different lab frame in which the gravity is e.q. given by $(0,1,0)$. From the Quaternion Algebra (see e.g. [Note_on_Quaternion](https://oduerr.github.io/gesture/Note_on_Quaternion.html)), we know that:
+What is happening in the code? First, we note that quaternion $q$, given back from the IMU transforms from the IMU coordinate system into the lab system. To make this clear, we write $g = g_{L \leftarrow I}$ in the following. We are asking "How does the gravity" looks like on the IMU $g_{I}$? The gravity in the laboratory frame is given by $g_{L}=(0,0,1)$. 
+Note that, we could also define a different lab frame in which the gravity is e.q. given by $(0,1,0)$. From the Quaternion Algebra (see e.g. [Note_on_Quaternion](https://oduerr.github.io/gesture/Note_on_Quaternion.html)), we know that (L = Lab, I = IMU):
 
 $$
- q_{\tt{lab}} = q \; q_{\tt{IMU}} \; q^{-1}
+ q_{L} = q_{L \leftarrow I} \; q_{I} \; q_{L \leftarrow I}^{-1}
 $$
 
-Where $q_{\tt{lab}}=(0,0,0,1)$ and $q_{\tt{IMU}}=(0,g_x, g_y, g_z)$ are pure quaternions, i.e. they take the vectors and set the real part $w$ to 0. To solve for $q_{IMU}$, we multiply with $q^{-1}$ and $q$ from left and right. Getting:
+Where $q_{\tt{L}}=(0,0,0,1)$ and $q_{I}=(0,g_x, g_y, g_z)$ are pure quaternions, i.e. they take the vectors and set the real part $w$ to 0. To solve for $q_{IMU}$, we multiply with $q^{-1}$ and $q$ from left and right. Getting:
 
 $$
-  q_{\tt{IMU}}  = q^{-1} \; q_{\tt{lab}} \; q
-$$ We can verify this with the R-Code:
+  q_{I}  = q_{L \leftarrow I}^{-1} \; q_{L} \; q_{L \leftarrow I}
+  = q_{I \leftarrow L} \; q_{L} \; q_{I \leftarrow L}^{-1}
+$$ 
+We can verify this with the R-Code:
 
 ```{r}
 q = as.quaternion(q.vec) 
@@ -145,12 +148,14 @@ uint8_t MPU6050::dmpGetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gra
 
 In math:
 
-\$\$ \begin{align}
-  yaw &= {\tt atan2} (2 q_x q_y - 2 q_w q_z, 2 q_w^2 + 2 q_x^2 -1) \\
+$$ 
+\begin{align}
+  {\tt yaw} &= {\tt atan2} (2 q_x q_y - 2 q_w q_z, 2 q_w^2 + 2 q_x^2 -1) \\
   
-  pitch &= {\tt atan} (\frac{g_x}{\sqrt{g_y^2 + g_z ^2}}) \\
-  roll &= {\tt atan} (\frac{g_y}{\sqrt{g_x^2 + g_z ^2}} )
-\end{align} \$\$
+  {\tt pitch} &= {\tt atan} (\frac{g_x}{\sqrt{g_y^2 + g_z ^2}}) \\
+  {\tt roll} &= {\tt atan} (\frac{g_y}{\sqrt{g_x^2 + g_z ^2}} )
+\end{align} 
+$$
 
 This translate to the following R-Code.
 
@@ -169,40 +174,42 @@ as_arduino = dmpGetYawPitchRoll(q@x, gravity)
 round(as_arduino,2)
 ```
 
-The result from the Arduino is: (2.28, -0.77, -0.31). We can reproduce the results from the Arduino (see Comparison).
+The result from the Arduino is: (2.28, -0.77, -0.31). We can reproduce the results from the Arduino (see Comparison for more examples).
 
 ### What the code does
 
-For yaw it extracts the angle using quaternions. For pitch it uses the before calculated gravity (in the IMU space). Let's start with the pitch and roll. From https://ahrs.readthedocs.io/en/latest/filters/tilt.html we find (with $a$ being the normalized gravity vector in the IMU space).
+For yaw it extracts the angle using quaternions. For pitch it uses the  gravity calculated before (in the IMU space). Let's start with the pitch and roll. From (https://ahrs.readthedocs.io/en/latest/filters/tilt.html we find (with $a$ being the normalized gravity vector in the IMU space).
 
 $$
-  {\tt pitch} = \arctan2(-a_x, \sqrt{a_y^2 + a_z^2}) \\
-  {\tt roll} = \arctan2(a_y, a_z) 
-$$ Pitch:
+\begin{align}
+  {\tt pitch} &= \arctan2(-a_x, \sqrt{a_y^2 + a_z^2}) \\
+  {\tt roll} &= \arctan2(a_y, a_z) 
+\end{align}
+$$ 
 
+Pitch:
 ```{r}
-#Pitch
-atan(gravity[1] / sqrt(gravity[2]^2 + gravity[3]^2)) #As done in Aduino
-#
-a = gravity/sqrt(sum(gravity^2)) #We are normalized
+#Pitch as As done on Aduino
+atan(gravity[1] / sqrt(gravity[2]^2 + gravity[3]^2)) 
+#Pitch from 
+a = gravity/sqrt(sum(gravity^2)) #Normalizing (we are almost normalized)
 atan2(-a[1], sqrt(a[2]^2 + a[3]^2)) 
 ```
 
 Except the sign, we got the same value as the code on the Arduino.
 
 Roll:
-
 ```{r}
 #Roll
 atan(gravity[2] / sqrt(gravity[1]^2 + gravity[3]^2)) #As done in Arduino
 atan2(gravity[2], gravity[3])
 ```
 
-For the roll, we get a different value compared to the Arduino. 
+**For the roll, we get a different value compared to the Arduino.** 
 
 # Comparison with other methods
 
-Usually the YPR is calculated differently.
+Usually the YPR is calculated differently not via the gravity first. In the following we compare different solutions.
 
 ```{r}
   #From poyu (value9250.py)
@@ -254,36 +261,33 @@ Usually the YPR is calculated differently.
   quart_to_ypr_chatgpt(as.numeric(q))
 ```
 
-Testing the routines, for different values. See https://matthew-brett.github.io/transforms3d/reference/transforms3d.euler.html
-```{r}
-  q = quaternion(Re = 0.99810947, i=0.06146124)
-  quart_to_ypr_value9250(as.numeric(q))
-  quart_to_ypr_chatgpt(as.numeric(q))
-```
+# Comparison with Arduino for many values
 
+This code shows that, we can reproduce the calculation done on the Ardunio for more examples.
 
-
-# Comparison
-
-This code shows that, we can reproduce the calculation done on the Adunio.
-
-```{r, eval=TRUE,show=FALSE}
+```{r, eval=TRUE,show=FALSE, name='loading'}
+  #Loading
   training <- read.csv("../../data/value06.csv",header=TRUE)
   training = rename(training, IMU=X)
   
   training$IMU = as.factor(training$IMU)
-  nrow(training)
+  #nrow(training)
   training$t=rep(1:(1+nrow(training)/6), each=6)[1:nrow(training)]
   
   dat = training %>% filter(IMU != "0")
   dat_q = dat %>% select(starts_with('q'))
+```
 
-  ypr_calc = matrix(NA, ncol=3, nrow = nrow(dat_q))
+```{r, eval=TRUE,show=FALSE, name='ypr-calculation'}
+  #YPR Calculation 
+ ypr_calc = matrix(NA, ncol=3, nrow = nrow(dat_q))
   for (i in 1:nrow(dat_q)){
     gr = dmpGetGravity(t(dat_q[i,]))
     ypr_calc[i,] = dmpGetYawPitchRoll(t(dat_q[i,]), gr)
   }
   r2d = 360/(2*pi)
+```
+```{r, eval=TRUE,show=FALSE, name='plots'}
   plot(r2d*ypr_calc[,1], r2d*dat$yaw, main='Calculated YAW (R vs Aduino) in degrees')
   plot(r2d*ypr_calc[,2], r2d*dat$pitch, main='Calculated Pitch (R vs Aduino) in degress')
   plot(r2d*ypr_calc[,3], r2d*dat$roll, main='Calculated Roll (R vs Aduino) in degrees')

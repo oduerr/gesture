@@ -1,7 +1,3 @@
-
-
-
-
 ## We describe the transformation from a **fixed** coordinate system 
 ## in space to a Coordinate system in Body frame
 #First we rotate g at original x-axis (this will be yaw)

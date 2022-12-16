@@ -1,0 +1,76 @@
+@article{carusoAnalysisAccuracyTen2021,
+  title = {Analysis of the {{Accuracy}} of {{Ten Algorithms}} for {{Orientation Estimation Using Inertial}} and {{Magnetic Sensing}} under {{Optimal Conditions}}: {{One Size Does Not Fit All}}},
+  shorttitle = {Analysis of the {{Accuracy}} of {{Ten Algorithms}} for {{Orientation Estimation Using Inertial}} and {{Magnetic Sensing}} under {{Optimal Conditions}}},
+  author = {Caruso, Marco and Sabatini, Angelo Maria and Laidig, Daniel and Seel, Thomas and Knaflitz, Marco and Della Croce, Ugo and Cereatti, Andrea},
+  year = {2021},
+  month = apr,
+  journal = {Sensors},
+  volume = {21},
+  number = {7},
+  pages = {2543},
+  issn = {1424-8220},
+  doi = {10.3390/s21072543},
+  abstract = {The orientation of a magneto and inertial measurement unit (MIMU) is estimated by means of sensor fusion algorithms (SFAs) thus enabling human motion tracking. However, despite several SFAs implementations proposed over the last decades, there is still a lack of consensus about the best performing SFAs and their accuracy. As suggested by recent literature, the filter parameters play a central role in determining the orientation errors. The aim of this work is to analyze the accuracy of ten SFAs while running under the best possible conditions (i.e., their parameter values are set using the orientation reference) in nine experimental scenarios including three rotation rates and three commercial products. The main finding is that parameter values must be specific for each SFA according to the experimental scenario to avoid errors comparable to those obtained when the default parameter values are used. Overall, when optimally tuned, no statistically significant differences are observed among the different SFAs in all tested experimental scenarios and the absolute errors are included between 3.8 deg and 7.1 deg. Increasing the rotation rate generally leads to a significant performance worsening. Errors are also influenced by the MIMU commercial model. SFA MATLAB implementations have been made available online.},
+  langid = {english},
+  file = {/Users/oli/Dropbox/Apps/Zotero/Rotational Regression/2021_Caruso et al_Analysis of the Accuracy of Ten Algorithms for Orientation Estimation Using/Caruso et al. - 2021 - Analysis of the Accuracy of Ten Algorithms for Ori.pdf}
+}
+
+@misc{duerrMyNotesRotation,
+  title = {My {{Notes}} on {{Rotation}}},
+  author = {Duerr, Oliver}
+}
+
+@article{grossekatthofer2012introduction,
+  title = {Introduction into Quaternions for Spacecraft Attitude Representation},
+  author = {Gro{\ss}ekatth{\"o}fer, Karsten and Yoon, Zizung},
+  year = {2012},
+  journal = {TU Berlin},
+  volume = {16},
+  file = {/Users/oli/Dropbox/Apps/Zotero/Rotational Regression/2012_Großekatthöfer_Yoon_Introduction into quaternions for spacecraft attitude representation/Großekatthöfer and Yoon - 2012 - Introduction into quaternions for spacecraft attit.pdf}
+}
+
+@article{peretroukhinProbabilisticRegressionRotations2019,
+  title = {Probabilistic {{Regression}} of {{Rotations}} Using {{Quaternion Averaging}} and a {{Deep Multi-Headed Network}}},
+  author = {Peretroukhin, Valentin and Wagstaff, Brandon and Giamou, Matthew and Kelly, Jonathan},
+  year = {2019},
+  publisher = {{arXiv}},
+  doi = {10.48550/ARXIV.1904.03182},
+  abstract = {Accurate estimates of rotation are crucial to vision-based motion estimation in augmented reality and robotics. In this work, we present a method to extract probabilistic estimates of rotation from deep regression models. First, we build on prior work and argue that a multi-headed network structure we name HydraNet provides better calibrated uncertainty estimates than methods that rely on stochastic forward passes. Second, we extend HydraNet to targets that belong to the rotation group, SO(3), by regressing unit quaternions and using the tools of rotation averaging and uncertainty injection onto the manifold to produce three-dimensional covariances. Finally, we present results and analysis on a synthetic dataset, learn consistent orientation estimates on the 7-Scenes dataset, and show how we can use our learned covariances to fuse deep estimates of relative orientation with classical stereo visual odometry to improve localization on the KITTI dataset.},
+  copyright = {arXiv.org perpetual, non-exclusive license},
+  keywords = {Computer Vision and Pattern Recognition (cs.CV),FOS: Computer and information sciences,Machine Learning (cs.LG),Robotics (cs.RO)},
+  file = {/Users/oli/Dropbox/Apps/Zotero/Rotational Regression/2019_Peretroukhin et al_Probabilistic Regression of Rotations using Quaternion Averaging and a Deep/Peretroukhin et al. - 2019 - Probabilistic Regression of Rotations using Quater.pdf}
+}
+
+@inproceedings{qingdeliLeastSquaresEllipsoid2004,
+  title = {Least Squares Ellipsoid Specific Fitting},
+  booktitle = {Geometric {{Modeling}} and {{Processing}}, 2004. {{Proceedings}}},
+  author = {{Qingde Li} and Griffiths, J.G.},
+  year = {2004},
+  pages = {335--340},
+  publisher = {{IEEE}},
+  address = {{Beijing, China}},
+  doi = {10.1109/GMAP.2004.1290055},
+  abstract = {In this paper, a sufficient condition for a quadric surface to be an ellipsoid has been developed and a closedform solution for ellipsoid fitting is developed based on this constraint, which is a best fit to the given data amongst those ellipsoids whose short radii are at least half of their major radii, in the sense of algebraic distance. A simple search procedure is proposed to pursuit the `best' ellipsoid when data cannot be well described by this type of ellipsoid. The proposed fitting algorithm is quick, stable and insensitive to small errors in the data.},
+  isbn = {978-0-7695-2078-0},
+  langid = {english},
+  file = {/Users/oli/Dropbox/Apps/Zotero/Rotational Regression/2004_Qingde Li_Griffiths_Least squares ellipsoid specific fitting/Qingde Li and Griffiths - 2004 - Least squares ellipsoid specific fitting.pdf}
+}
+
+@article{weberRIANNRobustNeural2021,
+  title = {{{RIANN}}\textemdash{{A Robust Neural Network Outperforms Attitude Estimation Filters}}},
+  author = {Weber, Daniel and G{\"u}hmann, Clemens and Seel, Thomas},
+  year = {2021},
+  month = sep,
+  journal = {AI},
+  volume = {2},
+  number = {3},
+  pages = {444--463},
+  publisher = {{Multidisciplinary Digital Publishing Institute}},
+  issn = {2673-2688},
+  doi = {10.3390/ai2030028},
+  abstract = {Inertial-sensor-based attitude estimation is a crucial technology in various applications, from human motion tracking to autonomous aerial and ground vehicles. Application scenarios differ in characteristics of the performed motion, presence of disturbances, and environmental conditions. Since state-of-the-art attitude estimators do not generalize well over these characteristics, their parameters must be tuned for the individual motion characteristics and circumstances. We propose RIANN, a ready-to-use, neural network-based, parameter-free, real-time-capable inertial attitude estimator, which generalizes well across different motion dynamics, environments, and sampling rates, without the need for application-specific adaptations. We gather six publicly available datasets of which we exploit two datasets for the method development and the training, and we use four datasets for evaluation of the trained estimator in three different test scenarios with varying practical relevance. Results show that RIANN outperforms state-of-the-art attitude estimation filters in the sense that it generalizes much better across a variety of motions and conditions in different applications, with different sensor hardware and different sampling frequencies. This is true even if the filters are tuned on each individual test dataset, whereas RIANN was trained on completely separate data and has never seen any of these test datasets. RIANN can be applied directly without adaptations or training and is therefore expected to enable plug-and-play solutions in numerous applications, especially when accuracy is crucial but no ground-truth data is available for tuning or when motion and disturbance characteristics are uncertain. We made RIANN publicly available.},
+  copyright = {http://creativecommons.org/licenses/by/3.0/},
+  langid = {english},
+  keywords = {attitude estimation,inertial sensors,information fusion,neural networks,nonlinear filters,performance evaluation,recurrent neural networks},
+  file = {/Users/oli/Dropbox/Apps/Zotero/Rotational Regression/2021_Weber et al_RIANN—A Robust Neural Network Outperforms Attitude Estimation Filters/Weber et al. - 2021 - RIANN—A Robust Neural Network Outperforms Attitude2.pdf;/Users/oli/Zotero/storage/C7E5D4LG/28.html}
+}

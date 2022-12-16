@@ -209,17 +209,28 @@ atan2(gravity[2], gravity[3])
 
 # Comparison with other methods
 
-Usually the YPR is calculated differently not via the gravity first. In the following we compare different solutions.
+Usually the YPR is calculated differently not via the gravity first. In the following we compare different solutions, we found on the internet. The all use more or less the following
+
+$$
+\begin{align*}
+\text{roll} &= \text{atan2}(2 \cdot (w \cdot x + y \cdot z), 1 - 2 \cdot (x^2 + y^2)) \\
+\text{pitch} &= \text{asin}(2 \cdot (w \cdot y - z \cdot x)) \\
+\text{yaw} &= \text{atan2}(2 \cdot (w \cdot z + x \cdot y), 1 - 2 \cdot (y^2 + z^2))
+\end{align*}
+$$
 
 ```{r}
+  quart_to_ypr_as_arduino = function(q){
+    gr = dmpGetGravity(q)
+    return(dmpGetYawPitchRoll(q, gr))
+  }
   #From poyu (value9250.py)
   #def quart_to_rpy(w, x, y, z):
   #  roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
   #  pitch = math.asin(2 * (w * y - x * z))
   #  yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))
   #  return yaw, pitch, roll
-  
-  quart_to_ypr_value9250 = function(q){
+  quart_to_ypr = function(q){
     w = q[1]
     x = q[2]
     y = q[3]
@@ -230,36 +241,92 @@ Usually the YPR is calculated differently not via the gravity first. In the foll
     return(c(yaw,pitch,roll))
   }
   
-  #https://stackoverflow.com/questions/5782658/extracting-yaw-from-a-quaternion
-# This function has yaw and roll mixed put (Euler, vs Aircarft) 
-  if (FALSE){
-    quart_to_ypr_stack = function(q){
-    yaw = atan2(2.0*(q[3]*q[4] + q[1]*q[2]), q[1]*q[1] - q[2]*q[2] - q[3]*q[3] + q[4]*q[4])
-    pitch = asin(-2.0*(q[2]*q[4] - q[1]*q[3]))
-    roll = atan2(2.0*(q[2]*q[3] + q[1]*q[4]), q[1]*q[1] + q[2]*q[2] - q[3]*q[3] - q[4]*q[4])
-      return(c(yaw,pitch,roll))
-  }
-  }
-  
- quart_to_ypr_chatgpt = function(q) {
-    # Import necessary libraries
-    w = q[1]
-    x = q[2]
-    y = q[3]
-    z = q[4]
-
-    # Convert the quaternion to Euler angles
-    roll = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
-    pitch = asin(2 * (w * y - z * x))
-    yaw = atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
-    return(c(yaw, pitch, roll))
- }
-
-  as_arduino
-  quart_to_ypr_value9250(as.numeric(q))
-  #quart_to_ypr_stack(as.numeric(q)) #Here roll and yaw are swaped
-  quart_to_ypr_chatgpt(as.numeric(q))
+  quart_to_ypr_as_arduino(as.numeric(q))
+  quart_to_ypr(as.numeric(q))
 ```
+
+## Testing the code with special value
+Note that the quaternion can be understood as a transformation of the IMU system into the fixed space system. Given a rotation about $\theta$ and the rotational $v_1, v_2, v_3$ the quaternion would be 
+
+$$
+q=(\cos(\theta/2), \sin(\theta/2)v_1,\sin(\theta/2)v_2, \sin(\theta/2)v_3)
+$$
+
+### Single yaw
+Let's construct some special quaternions and see if the results are correct. Checking the yaw
+
+```{r}
+  q = c(0.30, 0, 0, 1.0) 
+  q  = q / sqrt(sum(q^2))
+  2*acos(q[1])
+```
+
+```{r}
+  rnames = c('yaw', 'pitch', 'roll')
+  data.frame(
+      arduino = quart_to_ypr_as_arduino(q),
+      quart_to_ypr = quart_to_ypr(q),
+      row.names = rnames 
+    ) 
+```
+
+### Single pitch
+```{r}
+  q = c(0.10, 0, 1.0, 0.0) 
+  q  = q / sqrt(sum(q^2))
+  #The angle is 
+  2*acos(q[1])
+  #of
+  pi - 2*acos(q[1])
+```
+
+
+```{r}
+  data.frame(
+      arduino = quart_to_ypr_as_arduino(q),
+      quart_to_ypr = quart_to_ypr(q),
+      row.names = rnames 
+    )
+```
+
+There seems to be a numerical artifact.
+
+### Single roll
+
+Let's look at a single roll about the angle:
+
+```{r}
+  q = c(0.30, 1.0, 0, 0.0) 
+  q  = q / sqrt(sum(q^2))
+  q
+  2*acos(q[1])
+```
+
+```{r}
+  data.frame(
+      arduino = quart_to_ypr_as_arduino(q),
+      quart_to_ypr = quart_to_ypr(q),
+      row.names = rnames 
+    ) 
+  #%>% #kable is not needed in the html the output still looks good
+  #and it destroys the printing in RStudio
+  #kableExtra::kable()
+```
+
+### Single roll
+A combined transformation
+
+```{r}
+  q = c(0.86169383, 0.02081877, -0.5058515, 0.03412598)
+  correct = c(0.15911653941132517, -60.832556785346696, -9.335093630495875) * 2*pi/360
+  data.frame(
+      arduino = quart_to_ypr_as_arduino(q),
+      quart_to_ypr = quart_to_ypr(q),
+      correct,
+      row.names = rnames 
+    ) 
+```
+
 
 # Comparison with Arduino for many values
 

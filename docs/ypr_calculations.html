@@ -117,7 +117,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#what-the-code-does-1" id="toc-what-the-code-does-1" class="nav-link" data-scroll-target="#what-the-code-does-1"> <span class="header-section-number">1.3.1</span> What the code does</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#comparison-with-other-methods" id="toc-comparison-with-other-methods" class="nav-link" data-scroll-target="#comparison-with-other-methods"> <span class="header-section-number">2</span> Comparison with other methods</a></li>
+  <li><a href="#comparison-with-other-methods" id="toc-comparison-with-other-methods" class="nav-link" data-scroll-target="#comparison-with-other-methods"> <span class="header-section-number">2</span> Comparison with other methods</a>
+  <ul class="collapse">
+  <li><a href="#testing-the-code-with-special-value" id="toc-testing-the-code-with-special-value" class="nav-link" data-scroll-target="#testing-the-code-with-special-value"> <span class="header-section-number">2.1</span> Testing the code with special value</a>
+  <ul class="collapse">
+  <li><a href="#single-yaw" id="toc-single-yaw" class="nav-link" data-scroll-target="#single-yaw"> <span class="header-section-number">2.1.1</span> Single yaw</a></li>
+  <li><a href="#single-pitch" id="toc-single-pitch" class="nav-link" data-scroll-target="#single-pitch"> <span class="header-section-number">2.1.2</span> Single pitch</a></li>
+  <li><a href="#single-roll" id="toc-single-roll" class="nav-link" data-scroll-target="#single-roll"> <span class="header-section-number">2.1.3</span> Single roll</a></li>
+  </ul></li>
+  </ul></li>
   <li><a href="#comparison-with-arduino-for-many-values" id="toc-comparison-with-arduino-for-many-values" class="nav-link" data-scroll-target="#comparison-with-arduino-for-many-values"> <span class="header-section-number">3</span> Comparison with Arduino for many values</a></li>
   </ul>
 </nav>
@@ -387,74 +395,186 @@ k   6.514515e-01</code></pre>
 </section>
 <section id="comparison-with-other-methods" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Comparison with other methods</h1>
-<p>Usually the YPR is calculated differently not via the gravity first. In the following we compare different solutions.</p>
+<p>Usually the YPR is calculated differently not via the gravity first. In the following we compare different solutions, we found on the internet. The all use more or less the following</p>
+<p><span class="math display">\[
+\begin{align*}
+\text{roll} &amp;= \text{atan2}(2 \cdot (w \cdot x + y \cdot z), 1 - 2 \cdot (x^2 + y^2)) \\
+\text{pitch} &amp;= \text{asin}(2 \cdot (w \cdot y - z \cdot x)) \\
+\text{yaw} &amp;= \text{atan2}(2 \cdot (w \cdot z + x \cdot y), 1 - 2 \cdot (y^2 + z^2))
+\end{align*}
+\]</span></p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#From poyu (value9250.py)</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">#def quart_to_rpy(w, x, y, z):</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  pitch = math.asin(2 * (w * y - x * z))</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  return yaw, pitch, roll</span></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  quart_to_ypr_value9250 <span class="ot">=</span> <span class="cf">function</span>(q){</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    w <span class="ot">=</span> q[<span class="dv">1</span>]</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> q[<span class="dv">2</span>]</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">=</span> q[<span class="dv">3</span>]</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">=</span> q[<span class="dv">4</span>]</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    roll <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> z), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (x <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> y))</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    pitch <span class="ot">=</span> <span class="fu">asin</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> y <span class="sc">-</span> x <span class="sc">*</span> z))</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    yaw <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> z <span class="sc">+</span> x <span class="sc">*</span> y), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (z <span class="sc">*</span> z <span class="sc">+</span> y <span class="sc">*</span> y))</span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">c</span>(yaw,pitch,roll))</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">#https://stackoverflow.com/questions/5782658/extracting-yaw-from-a-quaternion</span></span>
-<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a><span class="co"># This function has yaw and roll mixed put (Euler, vs Aircarft) </span></span>
-<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="cn">FALSE</span>){</span>
-<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    quart_to_ypr_stack <span class="ot">=</span> <span class="cf">function</span>(q){</span>
-<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    yaw <span class="ot">=</span> <span class="fu">atan2</span>(<span class="fl">2.0</span><span class="sc">*</span>(q[<span class="dv">3</span>]<span class="sc">*</span>q[<span class="dv">4</span>] <span class="sc">+</span> q[<span class="dv">1</span>]<span class="sc">*</span>q[<span class="dv">2</span>]), q[<span class="dv">1</span>]<span class="sc">*</span>q[<span class="dv">1</span>] <span class="sc">-</span> q[<span class="dv">2</span>]<span class="sc">*</span>q[<span class="dv">2</span>] <span class="sc">-</span> q[<span class="dv">3</span>]<span class="sc">*</span>q[<span class="dv">3</span>] <span class="sc">+</span> q[<span class="dv">4</span>]<span class="sc">*</span>q[<span class="dv">4</span>])</span>
-<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    pitch <span class="ot">=</span> <span class="fu">asin</span>(<span class="sc">-</span><span class="fl">2.0</span><span class="sc">*</span>(q[<span class="dv">2</span>]<span class="sc">*</span>q[<span class="dv">4</span>] <span class="sc">-</span> q[<span class="dv">1</span>]<span class="sc">*</span>q[<span class="dv">3</span>]))</span>
-<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    roll <span class="ot">=</span> <span class="fu">atan2</span>(<span class="fl">2.0</span><span class="sc">*</span>(q[<span class="dv">2</span>]<span class="sc">*</span>q[<span class="dv">3</span>] <span class="sc">+</span> q[<span class="dv">1</span>]<span class="sc">*</span>q[<span class="dv">4</span>]), q[<span class="dv">1</span>]<span class="sc">*</span>q[<span class="dv">1</span>] <span class="sc">+</span> q[<span class="dv">2</span>]<span class="sc">*</span>q[<span class="dv">2</span>] <span class="sc">-</span> q[<span class="dv">3</span>]<span class="sc">*</span>q[<span class="dv">3</span>] <span class="sc">-</span> q[<span class="dv">4</span>]<span class="sc">*</span>q[<span class="dv">4</span>])</span>
-<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="fu">c</span>(yaw,pitch,roll))</span>
-<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a> quart_to_ypr_chatgpt <span class="ot">=</span> <span class="cf">function</span>(q) {</span>
-<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Import necessary libraries</span></span>
-<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>    w <span class="ot">=</span> q[<span class="dv">1</span>]</span>
-<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> q[<span class="dv">2</span>]</span>
-<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">=</span> q[<span class="dv">3</span>]</span>
-<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">=</span> q[<span class="dv">4</span>]</span>
-<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert the quaternion to Euler angles</span></span>
-<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>    roll <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> z), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (x <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> y))</span>
-<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>    pitch <span class="ot">=</span> <span class="fu">asin</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> y <span class="sc">-</span> z <span class="sc">*</span> x))</span>
-<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>    yaw <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> z <span class="sc">+</span> x <span class="sc">*</span> y), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (y <span class="sc">*</span> y <span class="sc">+</span> z <span class="sc">*</span> z))</span>
-<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">c</span>(yaw, pitch, roll))</span>
-<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a> }</span>
-<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>  as_arduino</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>  quart_to_ypr_as_arduino <span class="ot">=</span> <span class="cf">function</span>(q){</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    gr <span class="ot">=</span> <span class="fu">dmpGetGravity</span>(q)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">dmpGetYawPitchRoll</span>(q, gr))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#From poyu (value9250.py)</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#def quart_to_rpy(w, x, y, z):</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  pitch = math.asin(2 * (w * y - x * z))</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  return yaw, pitch, roll</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  quart_to_ypr <span class="ot">=</span> <span class="cf">function</span>(q){</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    w <span class="ot">=</span> q[<span class="dv">1</span>]</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> q[<span class="dv">2</span>]</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">=</span> q[<span class="dv">3</span>]</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">=</span> q[<span class="dv">4</span>]</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    roll <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> z), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (x <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> y))</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    pitch <span class="ot">=</span> <span class="fu">asin</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> y <span class="sc">-</span> x <span class="sc">*</span> z))</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    yaw <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> z <span class="sc">+</span> x <span class="sc">*</span> y), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (z <span class="sc">*</span> z <span class="sc">+</span> y <span class="sc">*</span> y))</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">c</span>(yaw,pitch,roll))</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quart_to_ypr_as_arduino</span>(<span class="fu">as.numeric</span>(q))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1]  2.2792391 -0.7702244 -0.3060571</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quart_to_ypr_value9250</span>(<span class="fu">as.numeric</span>(q))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quart_to_ypr</span>(<span class="fu">as.numeric</span>(q))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -2.5986827  0.7692547 -0.4326218</code></pre>
+</div>
+</div>
+<section id="testing-the-code-with-special-value" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="testing-the-code-with-special-value"><span class="header-section-number">2.1</span> Testing the code with special value</h2>
+<p>Note that the quaternion can be understood as a transformation of the IMU system into the fixed space system. Given a rotation about <span class="math inline">\(\theta\)</span> and the rotational <span class="math inline">\(v_1, v_2, v_3\)</span> the quaternion would be</p>
+<p><span class="math display">\[
+q=(\cos(\theta/2), \sin(\theta/2)v_1,\sin(\theta/2)v_2, \sin(\theta/2)v_3)
+\]</span></p>
+<section id="single-yaw" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="single-yaw"><span class="header-section-number">2.1.1</span> Single yaw</h3>
+<p>Let’s construct some special quaternions and see if the results are correct. Checking the yaw</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">0.30</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">1.0</span>) </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  q  <span class="ot">=</span> q <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(q<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.558679</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>  rnames <span class="ot">=</span> <span class="fu">c</span>(<span class="st">'yaw'</span>, <span class="st">'pitch'</span>, <span class="st">'roll'</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">arduino =</span> <span class="fu">quart_to_ypr_as_arduino</span>(q),</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">quart_to_ypr =</span> <span class="fu">quart_to_ypr</span>(q),</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> rnames </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>        arduino quart_to_ypr
+yaw   -2.558679     2.558679
+pitch  0.000000     0.000000
+roll   0.000000     0.000000</code></pre>
+</div>
+</div>
+</section>
+<section id="single-pitch" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="single-pitch"><span class="header-section-number">2.1.2</span> Single pitch</h3>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="dv">0</span>, <span class="fl">1.0</span>, <span class="fl">0.0</span>) </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  q  <span class="ot">=</span> q <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(q<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#The angle is </span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.942255</code></pre>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#quart_to_ypr_stack(as.numeric(q)) #Here roll and yaw are swaped</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">quart_to_ypr_chatgpt</span>(<span class="fu">as.numeric</span>(q))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#of</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  pi <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -2.5986827  0.7692547 -0.4326218</code></pre>
+<pre><code>[1] 0.1993373</code></pre>
 </div>
 </div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">arduino =</span> <span class="fu">quart_to_ypr_as_arduino</span>(q),</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">quart_to_ypr =</span> <span class="fu">quart_to_ypr</span>(q),</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> rnames </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         arduino quart_to_ypr
+yaw    3.1415927    3.1415927
+pitch -0.1993373    0.1993373
+roll   0.0000000    3.1415927</code></pre>
+</div>
+</div>
+<p>There seems to be a numerical artifact.</p>
+</section>
+<section id="single-roll" class="level3" data-number="2.1.3">
+<h3 data-number="2.1.3" class="anchored" data-anchor-id="single-roll"><span class="header-section-number">2.1.3</span> Single roll</h3>
+<p>Let’s look at a single roll about the angle:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">0.30</span>, <span class="fl">1.0</span>, <span class="dv">0</span>, <span class="fl">0.0</span>) </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  q  <span class="ot">=</span> q <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(q<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.558679</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">arduino =</span> <span class="fu">quart_to_ypr_as_arduino</span>(q),</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">quart_to_ypr =</span> <span class="fu">quart_to_ypr</span>(q),</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> rnames </span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> </span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:right;"> arduino </th>
+   <th style="text-align:right;"> quart_to_ypr </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> yaw </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+   <td style="text-align:right;"> 0.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> pitch </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+   <td style="text-align:right;"> 0.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> roll </td>
+   <td style="text-align:right;"> 0.5829136 </td>
+   <td style="text-align:right;"> 2.558679 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</section>
+</section>
 </section>
 <section id="comparison-with-arduino-for-many-values" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Comparison with Arduino for many values</h1>
@@ -462,51 +582,51 @@ k   6.514515e-01</code></pre>
 <div class="cell" data-show="false" name="loading">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Loading</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../../data/value06.csv"</span>,<span class="at">header=</span><span class="cn">TRUE</span>)</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">=</span> <span class="fu">rename</span>(training, <span class="at">IMU=</span>X)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>IMU <span class="ot">=</span> <span class="fu">as.factor</span>(training<span class="sc">$</span>IMU)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#nrow(training)</span></span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>t<span class="ot">=</span><span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">nrow</span>(training)<span class="sc">/</span><span class="dv">6</span>), <span class="at">each=</span><span class="dv">6</span>)[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(training)]</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">=</span> training <span class="sc">%&gt;%</span> <span class="fu">filter</span>(IMU <span class="sc">!=</span> <span class="st">"0"</span>)</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  dat_q <span class="ot">=</span> dat <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">'q'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Loading</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"../../data/value06.csv"</span>,<span class="at">header=</span><span class="cn">TRUE</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  training <span class="ot">=</span> <span class="fu">rename</span>(training, <span class="at">IMU=</span>X)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>IMU <span class="ot">=</span> <span class="fu">as.factor</span>(training<span class="sc">$</span>IMU)</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#nrow(training)</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  training<span class="sc">$</span>t<span class="ot">=</span><span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">nrow</span>(training)<span class="sc">/</span><span class="dv">6</span>), <span class="at">each=</span><span class="dv">6</span>)[<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(training)]</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">=</span> training <span class="sc">%&gt;%</span> <span class="fu">filter</span>(IMU <span class="sc">!=</span> <span class="st">"0"</span>)</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>  dat_q <span class="ot">=</span> dat <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">'q'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell" data-show="false" name="ypr-calculation">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#YPR Calculation </span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a> ypr_calc <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">ncol=</span><span class="dv">3</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(dat_q))</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dat_q)){</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    gr <span class="ot">=</span> <span class="fu">dmpGetGravity</span>(<span class="fu">t</span>(dat_q[i,]))</span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    ypr_calc[i,] <span class="ot">=</span> <span class="fu">dmpGetYawPitchRoll</span>(<span class="fu">t</span>(dat_q[i,]), gr)</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  r2d <span class="ot">=</span> <span class="dv">360</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>pi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#YPR Calculation </span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a> ypr_calc <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">ncol=</span><span class="dv">3</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(dat_q))</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dat_q)){</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    gr <span class="ot">=</span> <span class="fu">dmpGetGravity</span>(<span class="fu">t</span>(dat_q[i,]))</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    ypr_calc[i,] <span class="ot">=</span> <span class="fu">dmpGetYawPitchRoll</span>(<span class="fu">t</span>(dat_q[i,]), gr)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  r2d <span class="ot">=</span> <span class="dv">360</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>pi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell" data-show="false" name="plots">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">1</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>yaw, <span class="at">main=</span><span class="st">'Calculated YAW (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">1</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>yaw, <span class="at">main=</span><span class="st">'Calculated YAW (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="768"></p>
+<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid" width="768"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">2</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>pitch, <span class="at">main=</span><span class="st">'Calculated Pitch (R vs Aduino) in degress'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">2</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>pitch, <span class="at">main=</span><span class="st">'Calculated Pitch (R vs Aduino) in degress'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-26-2.png" class="img-fluid" width="768"></p>
+<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-38-2.png" class="img-fluid" width="768"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">3</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>roll, <span class="at">main=</span><span class="st">'Calculated Roll (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r2d<span class="sc">*</span>ypr_calc[,<span class="dv">3</span>], r2d<span class="sc">*</span>dat<span class="sc">$</span>roll, <span class="at">main=</span><span class="st">'Calculated Roll (R vs Aduino) in degrees'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-26-3.png" class="img-fluid" width="768"></p>
+<p><img src="ypr_calculations_files/figure-html/unnamed-chunk-38-3.png" class="img-fluid" width="768"></p>
 </div>
 </div>
 <p>These plots show that, we can reproduce the Aduino values in R.</p>

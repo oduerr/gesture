@@ -113,16 +113,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#using-the-dmp-quaternion" id="toc-using-the-dmp-quaternion" class="nav-link active" data-scroll-target="#using-the-dmp-quaternion"><span class="toc-section-number">1</span>  Using the DMP quaternion</a>
   <ul class="collapse">
   <li><a href="#getting-the-quaternion-q" id="toc-getting-the-quaternion-q" class="nav-link" data-scroll-target="#getting-the-quaternion-q"><span class="toc-section-number">1.1</span>  Getting the quaternion q</a></li>
-  <li><a href="#understanding-the-quaternion" id="toc-understanding-the-quaternion" class="nav-link" data-scroll-target="#understanding-the-quaternion"><span class="toc-section-number">1.2</span>  Understanding the quaternion</a></li>
-  <li><a href="#todo-make-nicer-testing-the-code-with-special-value" id="toc-todo-make-nicer-testing-the-code-with-special-value" class="nav-link" data-scroll-target="#todo-make-nicer-testing-the-code-with-special-value"><span class="toc-section-number">1.3</span>  TODO make nicer Testing the code with special value</a>
+  <li><a href="#understanding-the-quaternion" id="toc-understanding-the-quaternion" class="nav-link" data-scroll-target="#understanding-the-quaternion"><span class="toc-section-number">1.2</span>  Understanding the quaternion</a>
   <ul class="collapse">
-  <li><a href="#single-yaw" id="toc-single-yaw" class="nav-link" data-scroll-target="#single-yaw"><span class="toc-section-number">1.3.1</span>  Single yaw</a></li>
-  <li><a href="#single-pitch" id="toc-single-pitch" class="nav-link" data-scroll-target="#single-pitch"><span class="toc-section-number">1.3.2</span>  Single pitch</a></li>
-  <li><a href="#single-roll" id="toc-single-roll" class="nav-link" data-scroll-target="#single-roll"><span class="toc-section-number">1.3.3</span>  Single roll</a></li>
-  <li><a href="#single-roll-1" id="toc-single-roll-1" class="nav-link" data-scroll-target="#single-roll-1"><span class="toc-section-number">1.3.4</span>  Single roll</a></li>
+  <li><a href="#calculation-of-yaw-pitch-roll-from-quarternion" id="toc-calculation-of-yaw-pitch-roll-from-quarternion" class="nav-link" data-scroll-target="#calculation-of-yaw-pitch-roll-from-quarternion"><span class="toc-section-number">1.2.1</span>  Calculation of yaw, pitch, roll from quarternion</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"><span class="toc-section-number">2</span>  </a></li>
   </ul>
 </nav>
 </div>
@@ -196,7 +191,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="understanding-the-quaternion" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="understanding-the-quaternion"><span class="header-section-number">1.2</span> Understanding the quaternion</h2>
 <p>A good source is shown in the following <a href="https://www.youtube.com/watch?v=Wv683WQHsWY">youtube video</a>.</p>
-<div class="quarto-video ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/wo9vZccmqwc" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
 <div class="quarto-video ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/Wv683WQHsWY" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
 <p>The quaternion send from the DMP is a rotation quaternion. A rotation quarternion describes a rotation of <span class="math inline">\(\theta\)</span> around a vector <span class="math inline">\(\vec{r}\)</span> as</p>
 <p><span class="math display">\[
@@ -210,8 +204,9 @@ q(\theta, v) =  \left(\cos(\frac{\theta}{2}),\; \sin(\frac{\theta}{2})  r_1, \;\
 <li><p>Step 2: Turn around x-axis in positive direction. If you found the right axis you have <span class="math inline">\(q(\theta, v) = \left(\cos(\theta/2),\; \sin(\theta /2), \;0, \;0\right)\)</span> and a rotation around 90 degrees in positive direction you have $q=(0,1,0,0)$ Rotate in the other direction you should get <span class="math inline">\(q=(0,-1,0,0)\)</span></p>
 <p>Repeat step 2 for the remaining axis. If all goes as expected you have a right handed coordinate system with a body-to-lab (a.k.a. frame) based quaternion.</p></li>
 </ul>
-<p>Calculation of yaw, pitch, roll</p>
-<p>The code used on the Arduino has been wrong <a href="https://oduerr.github.io/gesture/ypr_calculations.html">ypr_calculations.html</a> it can be directly calculated from the quaternion via.</p>
+<section id="calculation-of-yaw-pitch-roll-from-quarternion" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="calculation-of-yaw-pitch-roll-from-quarternion"><span class="header-section-number">1.2.1</span> Calculation of yaw, pitch, roll from quarternion</h3>
+<p>The code used on the Arduino has been wrong <a href="https://oduerr.github.io/gesture/ypr_calculations.html">ypr_calculations.html</a> see also <a href="https://github.com/jrowberg/i2cdevlib/issues/222">Bugreport</a> but it can be directly calculated from the quaternion via.</p>
 <p><span class="math display">\[
 \begin{align*}
 \text{roll} &amp;= \text{atan2}(2 \cdot (w \cdot x + y \cdot z), 1 - 2 \cdot (x^2 + y^2)) \\
@@ -219,174 +214,9 @@ q(\theta, v) =  \left(\cos(\frac{\theta}{2}),\; \sin(\frac{\theta}{2})  r_1, \;\
 \text{yaw} &amp;= \text{atan2}(2 \cdot (w \cdot z + x \cdot y), 1 - 2 \cdot (y^2 + z^2))
 \end{align*}
 \]</span></p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#From poyu (value9250.py)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">#def quart_to_rpy(w, x, y, z):</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  pitch = math.asin(2 * (w * y - x * z))</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  return yaw, pitch, roll</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  quart_to_ypr <span class="ot">=</span> <span class="cf">function</span>(q){</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    w <span class="ot">=</span> q[<span class="dv">1</span>]</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> q[<span class="dv">2</span>]</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">=</span> q[<span class="dv">3</span>]</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    z <span class="ot">=</span> q[<span class="dv">4</span>]</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    roll <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> z), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (x <span class="sc">*</span> x <span class="sc">+</span> y <span class="sc">*</span> y))</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    pitch <span class="ot">=</span> <span class="fu">asin</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> y <span class="sc">-</span> x <span class="sc">*</span> z))</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    yaw <span class="ot">=</span> <span class="fu">atan2</span>(<span class="dv">2</span> <span class="sc">*</span> (w <span class="sc">*</span> z <span class="sc">+</span> x <span class="sc">*</span> y), <span class="dv">1</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> (z <span class="sc">*</span> z <span class="sc">+</span> y <span class="sc">*</span> y))</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">c</span>(yaw,pitch,roll))</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-</section>
-<section id="todo-make-nicer-testing-the-code-with-special-value" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="todo-make-nicer-testing-the-code-with-special-value"><span class="header-section-number">1.3</span> TODO make nicer Testing the code with special value</h2>
-<p>Note that the quaternion can be understood as a transformation of the IMU system into the fixed space system. Given a rotation about <span class="math inline">\(\theta\)</span> and the rotational <span class="math inline">\(v_1, v_2, v_3\)</span> the quaternion would be</p>
-<p><span class="math display">\[
-q=(\cos(\theta/2), \sin(\theta/2)v_1,\sin(\theta/2)v_2, \sin(\theta/2)v_3)
-\]</span></p>
-<section id="single-yaw" class="level3" data-number="1.3.1">
-<h3 data-number="1.3.1" class="anchored" data-anchor-id="single-yaw"><span class="header-section-number">1.3.1</span> Single yaw</h3>
-<p>Let’s construct some special quaternions and see if the results are correct. Checking the yaw</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>  alpha <span class="ot">=</span> <span class="dv">30</span> <span class="sc">*</span> <span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">/</span> <span class="dv">360</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">cos</span>(alpha<span class="sc">/</span><span class="dv">2</span>), <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">1.0</span>) </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  q  <span class="ot">=</span> q <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(q<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.605458</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>  rnames <span class="ot">=</span> <span class="fu">c</span>(<span class="st">'yaw'</span>, <span class="st">'pitch'</span>, <span class="st">'roll'</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">quart_to_ypr =</span> <span class="fu">quart_to_ypr</span>(q),</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> rnames </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>      quart_to_ypr
-yaw       1.605458
-pitch     0.000000
-roll      0.000000</code></pre>
-</div>
-</div>
-</section>
-<section id="single-pitch" class="level3" data-number="1.3.2">
-<h3 data-number="1.3.2" class="anchored" data-anchor-id="single-pitch"><span class="header-section-number">1.3.2</span> Single pitch</h3>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="dv">0</span>, <span class="fl">1.0</span>, <span class="fl">0.0</span>) </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  q  <span class="ot">=</span> q <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(q<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#The angle is </span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2.942255</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#of</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  pi <span class="sc">-</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1993373</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">quart_to_ypr =</span> <span class="fu">quart_to_ypr</span>(q),</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> rnames </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>      quart_to_ypr
-yaw      3.1415927
-pitch    0.1993373
-roll     3.1415927</code></pre>
-</div>
-</div>
-<p>There seems to be a numerical artifact.</p>
-</section>
-<section id="single-roll" class="level3" data-number="1.3.3">
-<h3 data-number="1.3.3" class="anchored" data-anchor-id="single-roll"><span class="header-section-number">1.3.3</span> Single roll</h3>
-<p>Let’s look at a single roll about the angle:</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="fl">1.0</span>, <span class="dv">0</span>, <span class="fl">0.0</span>) </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  q  <span class="ot">=</span> q <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(q<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  q</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9805807 0.1961161 0.0000000 0.0000000</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">*</span><span class="fu">acos</span>(q[<span class="dv">1</span>]) <span class="sc">*</span> <span class="dv">360</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>pi)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 22.61986</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">quart_to_ypr =</span> <span class="fu">quart_to_ypr</span>(q),</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> rnames </span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>      quart_to_ypr
-yaw      0.0000000
-pitch    0.0000000
-roll     0.3947911</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#%&gt;% #kable is not needed in the html the output still looks good</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">#and it destroys the printing in RStudio</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#kableExtra::kable()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-</section>
-<section id="single-roll-1" class="level3" data-number="1.3.4">
-<h3 data-number="1.3.4" class="anchored" data-anchor-id="single-roll-1"><span class="header-section-number">1.3.4</span> Single roll</h3>
-<p>A combined transformation</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">0.86169383</span>, <span class="fl">0.02081877</span>, <span class="sc">-</span><span class="fl">0.5058515</span>, <span class="fl">0.03412598</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  correct <span class="ot">=</span> <span class="fu">c</span>(<span class="fl">0.15911653941132517</span>, <span class="sc">-</span><span class="fl">60.832556785346696</span>, <span class="sc">-</span><span class="fl">9.335093630495875</span>) <span class="sc">*</span> <span class="dv">2</span><span class="sc">*</span>pi<span class="sc">/</span><span class="dv">360</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">quart_to_ypr =</span> <span class="fu">quart_to_ypr</span>(q),</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>      correct,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> rnames </span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>      quart_to_ypr      correct
-yaw    0.077534994  0.002777108
-pitch -1.061728419 -1.061728408
-roll   0.002777099 -0.162928120</code></pre>
-</div>
-</div>
+<p>It is implemented in <a href="https://github.com/oduerr/gesture/blob/main/python/https://github.com/oduerr/gesture/blob/main/python/quaternion_utils.py">quaternion_utils.py</a> where you also find testing code.</p>
 </section>
 </section>
-</section>
-<section id="section" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> </h1>
 </section>
 
 </main>

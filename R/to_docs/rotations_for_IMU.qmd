@@ -60,8 +60,6 @@ uint8_t MPU6050::dmpGetQuaternion(Quaternion *q, const uint8_t* packet) {
 
 A good source is shown in the following [youtube video](https://www.youtube.com/watch?v=Wv683WQHsWY).
 
-{{< video https://www.youtube.com/embed/wo9vZccmqwc >}}
-
 {{< video https://www.youtube.com/embed/Wv683WQHsWY >}}
 
 The quaternion send from the DMP is a rotation quaternion. A rotation quarternion describes a rotation of $\theta$ around a vector $\vec{r}$ as
@@ -78,9 +76,9 @@ $$
 
     Repeat step 2 for the remaining axis. If all goes as expected you have a right handed coordinate system with a body-to-lab (a.k.a. frame) based quaternion.
 
-Calculation of yaw, pitch, roll
+### Calculation of yaw, pitch, roll from quarternion
 
-The code used on the Arduino has been wrong [ypr_calculations.html](https://oduerr.github.io/gesture/ypr_calculations.html) it can be directly calculated from the quaternion via.
+The code used on the Arduino has been wrong [ypr_calculations.html](https://oduerr.github.io/gesture/ypr_calculations.html) see also [Bugreport](https://github.com/jrowberg/i2cdevlib/issues/222) but it can be directly calculated from the quaternion via.
 
 $$
 \begin{align*}
@@ -90,105 +88,4 @@ $$
 \end{align*}
 $$
 
-```{r ypr}
-  #From poyu (value9250.py)
-  #def quart_to_rpy(w, x, y, z):
-  #  roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
-  #  pitch = math.asin(2 * (w * y - x * z))
-  #  yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))
-  #  return yaw, pitch, roll
-  quart_to_ypr = function(q){
-    w = q[1]
-    x = q[2]
-    y = q[3]
-    z = q[4]
-    roll = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
-    pitch = asin(2 * (w * y - x * z))
-    yaw = atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))
-    return(c(yaw,pitch,roll))
-  }
-```
-
-## TODO make nicer Testing the code with special value
-
-Note that the quaternion can be understood as a transformation of the IMU system into the fixed space system. Given a rotation about $\theta$ and the rotational $v_1, v_2, v_3$ the quaternion would be
-
-$$
-q=(\cos(\theta/2), \sin(\theta/2)v_1,\sin(\theta/2)v_2, \sin(\theta/2)v_3)
-$$
-
-### Single yaw
-
-Let's construct some special quaternions and see if the results are correct. Checking the yaw
-
-```{r yaw}
-  alpha = 30 * 2 * pi / 360
-  q = c(cos(alpha/2), 0, 0, 1.0) 
-  q  = q / sqrt(sum(q^2))
-  2*acos(q[1])
-```
-
-```{r yaw1}
-  rnames = c('yaw', 'pitch', 'roll')
-  data.frame(
-      quart_to_ypr = quart_to_ypr(q),
-      row.names = rnames 
-    ) 
-```
-
-### Single pitch
-
-```{r pitch}
-  q = c(0.10, 0, 1.0, 0.0) 
-  q  = q / sqrt(sum(q^2))
-  #The angle is 
-  2*acos(q[1])
-  #of
-  pi - 2*acos(q[1])
-```
-
-```{r pitch2}
-  data.frame(
-      quart_to_ypr = quart_to_ypr(q),
-      row.names = rnames 
-    )
-```
-
-There seems to be a numerical artifact.
-
-### Single roll
-
-Let's look at a single roll about the angle:
-
-```{r}
-  q = c(5, 1.0, 0, 0.0) 
-  q  = q / sqrt(sum(q^2))
-  q
-  2*acos(q[1]) * 360/(2*pi)
-```
-
-```{r}
-  data.frame(
-      quart_to_ypr = quart_to_ypr(q),
-      row.names = rnames 
-    ) 
-  #%>% #kable is not needed in the html the output still looks good
-  #and it destroys the printing in RStudio
-  #kableExtra::kable()
-```
-
-### Single roll
-
-A combined transformation
-
-```{r}
-  q = c(0.86169383, 0.02081877, -0.5058515, 0.03412598)
-  correct = c(0.15911653941132517, -60.832556785346696, -9.335093630495875) * 2*pi/360
-  data.frame(
-      quart_to_ypr = quart_to_ypr(q),
-      correct,
-      row.names = rnames 
-    ) 
-```
-
-# 
+It is implemented in [quaternion_utils.py](https://github.com/oduerr/gesture/blob/main/python/https://github.com/oduerr/gesture/blob/main/python/quaternion_utils.py) where you also find testing code.

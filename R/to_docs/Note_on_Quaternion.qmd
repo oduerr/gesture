@@ -30,13 +30,16 @@ bibliography: references.bib
   rabbit = bunny[idx,]
   rabbit = rabbit
   rabbit = rabbit %*% t(R) 
+  rabbit = t(rabbit) #3x5000 
 ```
 
 This is a primer on rotations and quaternions, as needed to describe rotations. Rotations are a constant source of confusion and they have confused me several time. This is kind of a letter to my future self.
 
 **This is Work in Progress TODOS**
 
--   **Still need corrections.**
+-   Needs some spelling / grammar / layout corrections
+
+-   Summary chapter missing
 
 -   Add arrows showing coordinate system to plane plot
 
@@ -54,6 +57,7 @@ Before we go into some math, lets have a first look how a rotation might look li
 
 ```{r rot-yaw-bunny}
 R = matrix(c(0.7071068,  0.7071068,  0.0000000, -0.7071068,  0.7071068,  0.0000000,  0.0000000,  0.0000000,  1.0000000), nrow=3)
+R = R
 round(R,4)
 par(mfrow=c(1,2))
 ```
@@ -65,10 +69,9 @@ $$
 $$
 
 ```{r, rot-bunny-plot, warning=FALSE, fig.width=10, fig.height=5, fig.align='center', cache=TRUE, fig.cap='Left: orinial data. Right: data rotated by 45 degrees around y-axis (or coordinate system rotated by -45) degrees. The y-axis points up and the rotation is done in counter clock-wise manner'}
-p3d(rabbit, h=NULL, xlab='x', ylab='y', zlab='z', )
-#It's vector times Matrix for row-vectors
-#Therefore we have to transpose (R x) to x^T R^T
-p3d(rabbit %*% t(R), h=NULL) 
+par(mfrow=c(1,2))
+p3d(t(rabbit), h=NULL, xlab='x', ylab='y', zlab='z', main='rabbit')
+p3d(t(R %*% rabbit), h=NULL,main='R * rabbit') #For plotting we need (N,3)
 par(mfrow=c(1,1))
 ```
 
@@ -168,9 +171,9 @@ $$
   R_z(\alpha) = R_{L \leftarrow B}^z(\alpha) =\begin{bmatrix}\cos(\alpha) & -\sin(\alpha) & 0 \\\sin(\alpha) &\cos(\alpha) & 0 \\0 & 0 & 1 \end{bmatrix}
 $$ {#eq-yaw}
 
-For moving the rabit , we get the following rotation matrix:
+For moving the rabbit , we get the following rotation matrix:
 
-```{r}
+```{r Rz}
 Rz = function(a){
   return(
     matrix(
@@ -181,13 +184,13 @@ Rz = function(a){
 Rz(45*2*pi/360)
 ```
 
-which is same rotation as used in the code used to transform the data.
+which is same rotation matrix as used earlier in Figure XXX to transform the data.
 
 #### A worked out example (Yaw-Pitch-Roll)
 
-Using an airplane, we know what happens (taxiing, take-off, rolling) and we can derive a nice chain of elementary rotations, which will serve as reference for later. The derivation can also be found at the following [notes](https://www.dropbox.com/s/n3oc5fjwrn1zaiu/Rotations%20without%20tears.pdf?dl=0).
+Using an airplane as example, we have a pretty good understanding what happens (taxiing, take-off, then rolling) and we can derive a nice chain of elementary rotations, which will serve as reference for later. The derivation can also be found at the following [notes](https://www.dropbox.com/s/n3oc5fjwrn1zaiu/Rotations%20without%20tears.pdf?dl=0).
 
-In the example, we use the following angles
+In the example, we use the following angles:
 
 ```{r, ypr_used}
 yaw = 60 * 2 * pi / 360     #This is w.r.t. the tower / labframe
@@ -278,7 +281,7 @@ R.pitch
 
 ###### Takeoff without taxiing
 
-```{r, fig.cap="Left: orinial data. Right: data rotated by XXX degrees around y-axis", fig.width=10, fig.height=5}
+```{r pitch_no_yaw, fig.cap="Left: orinial data. Right: data rotated by XXX degrees around y-axis", fig.width=10, fig.height=5}
 make_plot(plane, R.pitch %*% plane)
 ```
 
@@ -287,15 +290,17 @@ make_plot(plane, R.pitch %*% plane)
 Here, we combine the transformations (**note the order**)
 
 $$
-x=R^{y}(\beta)R^z(\alpha)x'
+x=R^{y}(\beta)R^z(\alpha)x'=(R^{y}(\beta)R^z(\alpha)) \; x'=R^{y}(\beta)\; (R^z(\alpha)x')
 $$
 
-```{r, fig.cap="Left: orinial data. Right: data rotated by XXX degrees around y-axis", fig.width=10, fig.height=5}
+Note that we can get $x$ in two ways. We could first calculate $R_{pitch.yaw}=R^{y}(\beta)R^z(\alpha)$ and then apply it to $x'$ or we could use the values $x_{yaw}$ and apply $R^y(\beta)$ on then. To avoid mistakes it's better to look at the full equation and see the possible associations by setting brackets. An error of this kind in the lab-to-body transformation costed me quite some time to fix.
+
+```{r, pitch_wity_yaw, fig.cap="Left: orinial data. Right: data rotated by XXX degrees around y-axis", fig.width=10, fig.height=5}
 R = R.pitch %*% R.yaw
 plane.pitch.yaw = R %*% plane 
+plane.pitch.yaw2 = R.pitch %*% plane.yaw
 make_plot(plane.yaw, plane.pitch.yaw,l1=c("x'", "y'", "z''"), l2=c("x''", "y''", "z''")) 
-#plot3d(plane.pitch.yaw[,1],plane.pitch.yaw[,2],plane.pitch.yaw[,3], xlim=c(-1,1), ylim=c(-1,1), zlim=c(-1,1), col=col) 
-#rglwidget()
+max(abs(plane.pitch.yaw - plane.pitch.yaw2))
 ```
 
 ##### In the air, the roll $\gamma$
@@ -309,7 +314,7 @@ R^x(\gamma) = \begin{bmatrix}
  0 & \sin(\gamma) & \cos(\gamma) \end{bmatrix}
 $$
 
-```{r}
+```{r, roll_with_yaw_pitch}
 Rx = function(g) matrix(
       c(1,0,0, 0, cos(g), -sin(g), 0, sin(g), cos(g))
       , nrow=3, byrow = TRUE) 
@@ -333,16 +338,16 @@ make_plot(plane.pitch.yaw, plane.roll.pitch.yaw,l1=c("x''", "y''", "z''"), l2=c(
 
 Playing around (sorry not in document yet)
 
-```{r}
+```{r get_R}
 #Return the rotion matrix (Lab  <- Fixed)
-get_R = function(yaw, roll, pitch){
+get_R = function(yaw, pitch, roll){
    Rroll = Rx(roll)
    Ryaw  = Rz(yaw)
    Rp = Ry(pitch) 
    Rani = Rroll %*% Rp %*% Ryaw
    return(Rani)
 }
-get_R(yaw, roll, pitch)
+get_R(yaw, pitch, roll)
 ```
 
 ```{r, manipulate, eval=FALSE}
@@ -398,16 +403,16 @@ $$
 Here, we are dealing with quaternions of length 1 and almost all quaternions used in Computergraphics are unit quaternions or a.k.a. *rotation quaternions*.
 
 ::: callout-note
-Only unit quaternions
+Here only unit quaternions
 
 All quaternions here are unit / rotation quaternions with length = 1
 :::
 
-### Geometric Representation with rotation quaternions
+## Geometric Representation with rotation quaternions
 
 All rotations can be described by unit vector $\vec{r}=(r_x,r_y,r_z)$ and a counter clock wise rotation (right hand rule) around this vector by an angle $\theta$. This is shown in the following figure
 
-![Rotation around a vector](images/rotation_abitrary_vector.png){#fig-rot width="400"}
+![Rotation of \$\\theta\$ around a vector (Euler rotation). All rotations can be seen as a Euler rotation.](images/rotation_abitrary_vector.png){#fig-rot width="400"}
 
 A rotation around $\vec{r}$ can parameterized with the unit quaternion
 
@@ -419,137 +424,171 @@ $$
 or componentwise
 
 $$
- q(\theta, v) =  \left(\cos(\frac{\theta}{2}),\; \sin(\frac{\theta}{2})  v_1, \;\sin(\frac{\theta} {2}) v_2, \;\sin(\frac{\theta}{2}) v_3 \right)
+ q(\theta, v) =  \left(\cos(\frac{\theta}{2}),\; \vec{r} \sin(\frac{\theta}{2}) \right)
 $$
 
 The length of $q$ is $||q||=\cos^2(\theta/2) + \sin^2(\theta/2) (v_1^2 + v_2^2 + v_3^2) = \cos^2(\theta/2) + \sin^2(\theta/2) = 1$
 
-#### Construction of quaternion from vector and angle
+### Some special quaternions
 
-Some special quaternions. The yawing can be described by a rotation of $\theta$ around the vector $\vec{r} = (0,0,1)$ and is given by
+The yawing can be described by a rotation of $\theta$ around the vector $\vec{r} = (0,0,1)$ and is given by
 
 $$
 q_{\text yaw} = (\cos(\frac{\theta}{2}) \theta, 0, 0, \sin(\frac{1}{2} \theta))
 $$
 
-The identity be constructed with $\theta=0$ about any axis $q(0) = (\cos(0), v_1 \sin(0), v_2 \sin(0), v_3 \sin(0) = (1,0,0,0)$.
+Similarly for pitch and roll. The identity be constructed with $\theta=0$ about any axis $q_{id} = (\cos(0), v_1 \sin(0), v_2 \sin(0), v_3 \sin(0) = (1,0,0,0)$.
 
-### Quaterion Algebra
+## Quaterion Algebra
 
--   Addition (easy but no geometeric interpretation), just for reference $$
-    q + p = p + q =  q_w + p_w + (q_1 + p_1) i + (q_2 + p_2) j + (q_3 + p_3) k
+-   Conjugate $q^*$ $\theta \rightarrow -\theta$ **is inverse** for rotation quaternions.
+
+$$
+    q^* = 
+     q(-\theta, v) =  \left(\cos(\frac{\theta}{2}),\;     -\vec{r} \sin(\frac{\theta}{2}) \right) = q^{-1}
     $$
 
 -   Multiplication: The multiplication is not commutative $$
     q * p \ne p * q = \tt{Complicated Formula}
+    $$ but associative
+
+    $$
+        (q_1 * q_2) * q_3  = q_1 * (q_2 * q_3) = q_1 * q_2 * q_3
+        $$
+
+-   Multiplication for unit quaternions ($w_1 = cos(\theta_1/2)$, $\vec{d_1}=sin(\theta_1/2)\vec{r_1}$)
+
+-   $$
+    (w_1, \vec{d}_1)(w_2, \vec{d}_2) = (w_1 w_2 - \vec{d}_1 \cdot \vec{d}_2, w_1  \vec{d}_2 + w_2 \vec{d}_1 + \vec{d}_1 \times \vec{d}_2)
     $$
 
--   Conjugate (just i --\> -i same for j and k) $$
-    q^* = q_w − i q_x − j q_y − k q_z
-    $$
+-   Inverse (in general) $$
+      q^{-1} = q^*/||q||
+      $$
 
--   Inverse (in gernal) $$
-    q^{-1} = q^*/||q||
-    $$
+## Pure Quaternions (real part = 0)
 
--   Inverse (in for rotation quaternions)
+We can also use quaternions to transform vectors. This is done with so-called **pure quaternions**. To obtain a pure quaternions, we set the real part to 0 and use the vector in space as the vector part. That is a vector $\vec{x'}$ in a certain direction without coding a rotation. From this vector, we like to know the position to which it gets rotated by the Euler rotation $q$. It can be shown that this is
 
 $$
-q^{-1}=q^*
-$$
+  (0, R(q) \vec{x'}) = q \cdot (0,\vec{x'}) \cdot q^{*} 
+$$ {#eq-rotquaternions}
 
-So for unit quaternions, you just have to conjugate to get the inverse. Luckily, we don't have to remember the formulaes and can use the onion-package.
-
-### Constructing a rotation matrix from Quaterions (first solution)
-
-It's possible to translate the quaternions back to a rotation matrix, see [quat_to_mat](https://github.com/oduerr/gesture/blob/main/R/rotation_utils.R). The code has been taken [from](https://automaticaddison.com/how-to-convert-a-quaternion-to-a-rotation-matrix/) We can construct our yaw matrix via
-
-```{r}
-  q01 = c(cos(yaw/2), 0, 0, 1 * sin(yaw/2))
-  #sum(q01^2) #1
-  quat_to_mat(q01)
-  Rz(yaw)
-```
-
-### Chaining rotations with quaterions (just multiply them)
-
-Now comes properly the most useful thing, that successive rotations can be done by multiplying the respective quaternions. Let's try this out, and move the rabit. Note we are still considering body to lab rotations.
-
-Let's multiply several quaternions. We start with $q_0 = (1,0,0,0)$.
-
-```{r, warning=FALSE, name='bunny1', fig.width=5, fig.height=5, fig.align='center', cache=TRUE}
-  q0 = onion::quaternion(Re = 1)
-  p3d(rabbit %*% quat_to_mat(q0), h=NULL, main = 'q0')
-```
-
-We add a second rotation (a first real) around the z-axis.
-
-```{r, warning=FALSE, name='bunny1', fig.width=5, fig.height=5, fig.align='center', cache=TRUE}
-  q1 = quaternion(Re=cos(-45/360 *pi), i = 0, j = 0, k = 1*sin(-45/360 *pi)) 
-  p3d(rabbit %*% quat_to_mat(q0 * q1), h=NULL, main = 'q0 * q1') 
-```
-
-We add a third rotation around the x-axis.
-
-```{r, bunny3, warning=FALSE, fig.width=5, fig.height=5, fig.align='center', cache=TRUE}
-  q2 = quaternion(Re=cos(-45/360 *pi), i = 1*sin(-45/360 *pi), j = 0, k = 0) 
-  q012 = q0 * q1 * q2 
-  p3d(rabbit %*% quat_to_mat(q012), h=NULL, main = 'q0 * q1 * q2')
-```
-
-Using the order $q_0 q_1 q_2$ you transfer the data of the bunny into the lab frame.
+Therefore a rotation can be described by a unit quaternion.
 
 ::: callout-important
-Quaternions for body--to-lab (frame) rotations multiply from left to right.
+$$
+(0, \vec{x}) = q\cdot (0,\vec{x'}) \cdot q^* 
+$$
 :::
 
-### Pure Quaternions (real part = 0)
-
-We can also use quaternions to transform vectors, without the need to explicitly construct the rotation matrix as done with the bunny data above. This is done with so-called **unit** or **vector quaternions**. To obtain a vector quaternions, we set the real part to 0 and use the vector in space as the vector part. That is a vector $\vec{v}$ in a certain direction without coding a rotation. From this vector, we like to know the position to which it gets rotated by $R(q) \vec{v}$ the rotation matrix $R(q)$ corresponding to $q$. It can be shown that this is
-
-$$
-  (0, R(q) \vec{v}) = q \cdot (0,\vec{v}) \cdot q^{*} 
-$$
-
-```{r}
- q = q0 * q1 * q2 #A unit quaterion defining the direction
- vec = matrix(c(12,13,45), ncol=1) #A vector with which we do the 
- quat_to_mat(q) %*% vec
- 
- vec_q = quaternion(Re = 0, i = vec[1], j=vec[2], k=vec[3])
- #q^-1 is the inverse, which for rotation quaternions is the conjugate 
- q * vec_q * q^-1
-```
-
-**TODO** build intuition for this expression, this looks like bra-ket
-
-#### Using pure quaterions to get the rotation matrix.
-
-We can use pure quaterions to get the rotation matrix. To make the problem harder, we use a more complicated quaternion:
-
-```{r}
-q = c(0.320,  0.300,  0.290, -0.850) 
-q = q / sqrt(sum(q^2))
-q = quaternion(Re=q[1], i=q[2], j=q[3], k=q[4])
-t(q@x)
-```
+### Rotation Matrix from quaternion
 
 We use the fact that the transformation is given by the results of the unit vectors of the "from coordinate" system:
 
-```{r}
- round(quat_to_mat(q), 4)
- 
- e1b = q * quaternion(Re = 0, i = 1) * q^-1 
- e2b = q * quaternion(Re = 0, j = 1) * q^-1 
- e3b = q * quaternion(Re = 0, k = 1) * q^-1 
- matrix(c(
-          e1b@x[2:4],
-          e2b@x[2:4],
-          e3b@x[2:4])
- ,nrow=3) %>% round(4)
+```{r, quat_to_matrix_projection}
+ quat_to_matrix_projection = function(q){
+   e1b = q * quaternion(Re = 0, i = 1) * q^-1 
+   e2b = q * quaternion(Re = 0, j = 1) * q^-1 
+   e3b = q * quaternion(Re = 0, k = 1) * q^-1 
+   return(matrix(c(
+            e1b@x[2:4],
+            e2b@x[2:4],
+            e3b@x[2:4])
+   ,nrow=3))
+ } 
 ```
 
-### Flight Coordinates from Quaterions
+Let's tests this against code taken [from](https://automaticaddison.com/how-to-convert-a-quaternion-to-a-rotation-matrix/)
+
+```{r, test_rot}
+source('rotation_utils.R')
+q = c(0.320,  0.300,  0.290, -0.850) 
+q = q / sqrt(sum(q^2))
+q = quaternion(Re=q[1], i=q[2], j=q[3], k=q[4])
+round(quat_to_mat(q), 4)
+quat_to_matrix_projection(q) %>% round(4)
+```
+
+## Chaining several quaternions
+
+What is the transformation of a product? Simply put $q=q_1 * q_2$ into equation XXX and we get
+
+$$
+ (0,x) = q\,(0,x')\, q^*=q_1 q_2 \, (0,x') \, (q_1 q_2)^*=q_1 q_2 \, (0,x') \, q_2^* q_1^*
+$$
+
+So we first apply transformation 2 and then transformation 1.
+
+**TODO** build intuition for this expression, this looks like bra-ket
+
+### Example Moving the rabbit
+
+Let's try this out, and move the rabbit. Note we are still considering body to lab rotations. First, we construct a (4 x N) matrix of pure quaternions adding 0 to the real component of the (3xN) data points of the rabbit.
+
+```{r r_quat}
+  q_rabbit = rbind(rep(0, ncol(rabbit)), rabbit)
+  q_rabbit = as.quaternion(q_rabbit)
+```
+
+Let's multiply several quaternions. We start with $q_0 = (1,0,0,0)$.
+
+```{r bunny_q0, warning=FALSE,fig.width=5, fig.height=5, fig.align='center', cache=TRUE}
+  q0 = onion::quaternion(Re = 1)
+  d = q0 * q_rabbit * q0^(-1)
+  d = d@x[2:4,]
+  p3d(t(d), h=NULL, main = 'q0 * rabbit * q0*')
+```
+
+We add a first real rotation around the z-axis ($\theta$=45 )
+
+```{r bunny_q1, warning=FALSE, name='bunny1', fig.width=5, fig.height=5, fig.align='center', cache=TRUE}
+  theta = 45*2*pi/360
+  q1 = quaternion(Re=cos(theta/2), i = 0, j = 0, k = sin(theta/2)) 
+  q = q0 * q1
+  d = q * q_rabbit * q^(-1)
+  d = d@x[2:4,]
+  p3d(t(d), h=NULL, main = 'q0 q1 rabbit q1* q0*') 
+```
+
+We add a second rotation around the x-axis.
+
+```{r bunny3, warning=FALSE, fig.width=5, fig.height=5, fig.align='center', cache=TRUE}
+  theta = 20*2*pi/360
+  q2 = quaternion(Re=cos(theta/2), i = 1*sin(theta/2), j = 0, k = 0) 
+  q012 = q0 * q1 * q2 
+  d = q012 * q_rabbit * q012^(-1)
+  d = d@x[2:4,]
+  p3d(t(d), h=NULL, main = 'q0 q1 q2 rabbit q2* q1* q0*') 
+```
+
+Transforming the can be done with
+
+$$
+R(q_0 \cdot q_1 \cdot  q_2) x = R(q_0) \cdot R(q_1) \cdot R(q_2) 
+$$
+
+or
+
+$$
+q_0 \cdot q_1 \cdot q_2 \; (0,x) \; (q_0 \cdot q_1 \cdot q_2 )^*
+$$
+
+Therefor we have
+
+$$
+R(q_0 \cdot q_1 \cdot  q_2) = R(q_0) \cdot R(q_1) \cdot R(q_2)
+$$
+
+```{r comp_rot}
+abs(quat_to_mat(q012) - quat_to_mat(q0) %*% quat_to_mat(q1) %*% quat_to_mat(q2)) %>% round(4)
+```
+
+::: callout-caution
+## q1\*q2 corresponds to a rotation, where first q2 is applied and then q1
+:::
+
+### Flight Coordinates from Quaternions
 
 In the definition above has defined as
 
@@ -557,42 +596,51 @@ $$
   R_{\text{Lab} \leftarrow \text{Body}} =  R_{roll} \, R_{pitch}\, R_{yaw} 
 $$
 
-TODO there is something wrong with rotation matrix
+Let's check this by comparing $R_{roll} \, R_{pitch}\, R_{yaw}$ against $R(q)$:
 
-```{r, comparison_rot_mat}
+```{r comparison_rot_mat}
   qyaw = quaternion(Re=cos(yaw/2), i=0,j=0,k=sin(yaw/2))
   qpitch = quaternion(Re=cos(pitch/2), i=0,j=sin(pitch/2),k=0)
   qroll = quaternion(Re=cos(roll/2), i=sin(roll/2), j=0,k=0)
+  R.yaw = Rz(yaw)
+  R.pitch = Ry(pitch)
+  R.roll = Rx(roll)
   R = R.roll %*% R.pitch %*% R.yaw
-  #R = R.pitch %*% R.yaw
+  q = qroll * qpitch * qyaw
+  
   if (FALSE) { #For debugging
     sum(qyaw@x^2) #1
     sum(qpitch@x^2) #1
     sum(qroll@x^2) #1
-    sum((quat_to_mat(qyaw) - R.yaw)^2) #2.46519e-32
-    sum((quat_to_mat(qpitch) - R.pitch)^2) #2.46519e-32
-    sum((quat_to_mat(qroll) - R.roll)^2) #4.930381e-32
+    R.yaw = Rz(yaw)
+    sum((quat_to_mat(qyaw) - R.yaw)^2) #close to 0
+    R.pitch = Ry(pitch)
+    sum((quat_to_mat(qpitch) - R.pitch)^2) #close to 0
+    R.roll = Rx(roll)
+    sum((quat_to_mat(qroll) - R.roll)^2) #close to 0
+    R.roll %*% R.pitch %*% R.yaw - R #close to 0
   }
-  qcomb_body_to_lab = (qyaw * qpitch) * qroll
-  qcomb_lab_to_body = qcomb_body_to_lab^-1
-  max(abs(R - quat_to_mat(qcomb_body_to_lab))) #1.4
-  max(abs(R - quat_to_mat(qcomb_lab_to_body))) #0
+  max(abs(R - quat_to_mat(q))) #1.4
+  #qcomb_lab_to_body = qcomb_body_to_lab^-1
+  #max(abs(R - quat_to_mat(qcomb_lab_to_body))) #0
   #---> Quat_to_
 ```
 
-Testing the package
+#### Quaternion to YPR
 
-The following translates a quaternion into ypr
+The following translation of a quaternion to ypr is often found
 
 $$
-roll = atan2(2 \cdot (w \cdot x + y \cdot z), 1 - 2 \cdot (x \cdot x + y \cdot y))\\
-pitch = asin(2 \cdot (w \cdot y - x \cdot z))\\
-yaw = atan2(2 \cdot (w \cdot z + x \cdot y), 1 - 2 \cdot (z \cdot z + y \cdot y))
+\begin{eqnarray*}
+roll =& atan2(2 \cdot (w \cdot x + y \cdot z), 1 - 2 \cdot (x \cdot x + y \cdot y))\\
+pitch =& asin(2 \cdot (w \cdot y - x \cdot z))\\
+yaw =& atan2(2 \cdot (w \cdot z + x \cdot y), 1 - 2 \cdot (z \cdot z + y \cdot y))
+\end{eqnarray*}
 $$
 
 ```{r, test_package}
-quart_to_ypr = function(q_body2lab){
-    q = q_body2lab
+quart_to_ypr = function(q_lab2body){
+    q = q_lab2body
     w = q[1]
     x = q[2]
     y = q[3]
@@ -602,9 +650,38 @@ quart_to_ypr = function(q_body2lab){
     yaw = atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))
     return(c(yaw,pitch,roll))
 }
-quart_to_ypr(qcomb_lab_to_body@x) #Wrong 
-quart_to_ypr(qcomb_body_to_lab@x) #Correct
-c(yaw, pitch, roll)
+
+q_1 = q^(-1)
+data.frame(
+  true = c(yaw, pitch, roll), 
+  q = quart_to_ypr(q@x),   #Wrong
+  q_inv = quart_to_ypr(q_1@x) #Nearly correct (angles)
+) %>%  round(3)
+
+```
+
+This shows that the code needs a quaternion going from lab-to-body and not body-to-lab. For going from lab to body, we unroll the elementary rotations (play the movie backwards). The respective quaternion is given by:
+
+$$
+q=q_\text{yaw}(\theta_{y}) q_\text{pitch}(\theta_{p}) q_\text{roll}(\theta_{r})
+$$
+
+Not 100% sure: It seems that angle is now between the body and lab, it stays as it is.
+
+```{r, from_lab_to_body}
+#Lab to Body (angles have negative sign)
+yaw_lb = yaw
+pitch_lb = pitch
+roll_lb = roll
+q_lb = quaternion(Re=cos(yaw_lb/2), i=0,j=0,k=sin(yaw_lb/2)) *
+  quaternion(Re=cos(pitch_lb/2), i=0,j=sin(pitch_lb/2),k=0) *
+  quaternion(Re=cos(roll_lb/2), i=sin(roll_lb/2), j=0,k=0)
+
+#q_lb = q^(-1)
+data.frame(
+  true_ypr = c(yaw, pitch, roll),
+  ypr_q_lb = quart_to_ypr(q_lb@x)
+) %>%  round(3)
 ```
 
 ### Rotation between two quaternions.
@@ -629,7 +706,7 @@ There are several software packages helping to deal with rotations and quaterion
 
 The AHRS package (https://ahrs.readthedocs.io/en/latest/index.html) used to estimate the rotation of a IMUs (sensors in e.g. cell phones and drones), uses quaternion as lot and also provides some basic operations.
 
-```{python, echo=TRUE, eval=FALSE}
+```{python, ahrs_python, echo=TRUE, eval=FALSE}
 from ahrs import Quaternion
 p = Quaternion([0.7071, 0.0, 0.7071, 0.0])
 p 
